@@ -1,0 +1,130 @@
+site_name: AI Documentation Agent
+site_description: Intelligent, self-improving AI agent for automated code documentation
+site_author: AI Documentation Agent Team
+site_url: https://deepak-sekarbabu.github.io/ai-doc-agent
+
+repo_name: deepak-sekarbabu/ai-doc-agent
+repo_url: https://github.com/deepak-sekarbabu/ai-doc-agent
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    # Light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.indexes
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+  
+  icon:
+    repo: fontawesome/brands/github
+    logo: material/robot
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/deepak-sekarbabu/ai-doc-agent
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/ai-doc-agent
+  
+  version:
+    provider: mike
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - admonition
+  - pymdownx.details
+  - attr_list
+  - md_in_html
+  - def_list
+  - tables
+  - footnotes
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+  - mermaid2
+  - print-site:
+      add_to_navigation: true
+      print_page_title: 'Complete Documentation (Single Page)'
+      enumerate_headings: true
+      enumerate_figures: true
+
+nav:
+  - Home: index.md
+  - Complete Guide: guide.md
+  - Getting Started:
+    - Quick Start: getting-started/quickstart.md
+    - Installation: getting-started/installation.md
+    - Configuration: getting-started/configuration.md
+  - User Guide:
+    - Overview: guide/overview.md
+    - AI Agent: guide/ai-agent.md
+    - Simple Generator: guide/doc-generator.md
+    - Command Reference: guide/commands.md
+  - Features:
+    - Iterative Refinement: features/iterative-refinement.md
+    - Project Detection: features/project-detection.md
+    - Multi-Format Output: features/output-formats.md
+  - Deployment:
+    - Bundling Guide: deployment/bundling.md
+    - Docker: deployment/docker.md
+    - PyInstaller: deployment/pyinstaller.md
+  - Reference:
+    - Project Structure: reference/structure.md
+    - API Reference: reference/api.md
+    - Configuration: reference/config.md
+  - Development:
+    - Contributing: development/contributing.md
+    - Testing: development/testing.md
+    - Changelog: development/changelog.md
+  - Examples:
+    - Sample Projects: examples/samples.md
+    - Troubleshooting: examples/troubleshooting.md
+
+extra_css:
+  - stylesheets/extra.css

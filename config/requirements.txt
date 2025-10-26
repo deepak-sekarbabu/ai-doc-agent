@@ -1,0 +1,11 @@
+# Documentation Generator Dependencies
+python-dotenv>=1.0.0
+requests>=2.31.0
+markdown>=3.5.0
+pdfkit>=1.0.0
+
+# MkDocs Dependencies
+mkdocs>=1.5.3
+mkdocs-material>=9.4.6
+pymdown-extensions>=10.3.1
+mkdocs-mermaid2-plugin>=1.1.0

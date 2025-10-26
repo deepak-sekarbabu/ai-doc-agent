@@ -1,0 +1,9 @@
+include README.md
+include README_DOC_GENERATOR.md
+include LICENSE
+include requirements.txt
+include .env
+include ai_agent.py
+include doc_generator.py
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]

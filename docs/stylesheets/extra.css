@@ -1,0 +1,106 @@
+/* Custom styles for AI Documentation Agent */
+
+/* Feature cards on homepage */
+.grid.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.grid.cards > * {
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.grid.cards > *:hover {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+
+/* Icon styling */
+.lg {
+  font-size: 2em;
+}
+
+.middle {
+  vertical-align: middle;
+}
+
+/* Code block enhancements */
+.highlight {
+  border-radius: 0.5rem;
+}
+
+/* Mermaid diagram styling */
+.mermaid {
+  text-align: center;
+  margin: 2rem 0;
+}
+
+/* Admonition custom colors */
+.md-typeset .admonition.example {
+  border-left-color: #00bcd4;
+}
+
+.md-typeset .admonition.example > .admonition-title {
+  background-color: rgba(0, 188, 212, 0.1);
+}
+
+/* Table enhancements */
+.md-typeset table:not([class]) {
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.md-typeset table:not([class]) th {
+  background-color: var(--md-primary-fg-color);
+  color: white;
+}
+
+/* Homepage hero section */
+.hero {
+  text-align: center;
+  padding: 3rem 0;
+}
+
+.hero h2 {
+  margin-bottom: 1rem;
+  font-weight: 300;
+}
+
+/* Command line prompt styling */
+.language-bash::before {
+  content: "$ ";
+  color: #888;
+  user-select: none;
+}
+
+/* Success badge */
+.badge-success {
+  background-color: #4caf50;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+}
+
+/* Show scroll bars */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.5);
+}

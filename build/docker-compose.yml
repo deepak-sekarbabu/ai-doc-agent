@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  ai-doc-agent:
+    build: .
+    container_name: ai-doc-agent
+    volumes:
+      # Mount your project directory
+      - .:/workspace
+      # Mount output directory
+      - ./output:/output
+    environment:
+      # Ollama configuration (update these)
+      - OLLAMA_API_URL=${OLLAMA_API_URL:-http://host.docker.internal:11434/api/generate}
+      - MODEL_NAME=${MODEL_NAME:-llama2:7b}
+      - API_TIMEOUT=${API_TIMEOUT:-300}
+      - MAX_RETRIES=${MAX_RETRIES:-3}
+      - RETRY_DELAY=${RETRY_DELAY:-2}
+    # Use host network to access local Ollama
+    network_mode: host
+    # Override command to analyze current directory
+    command: ["--directory", "/workspace", "--format", "markdown"]
