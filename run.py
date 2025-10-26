@@ -13,7 +13,7 @@ src_path = Path(__file__).parent / "src"
 sys.path.insert(0, str(src_path))
 
 # Import and run the agent
-from ai_agent import main
+from src.ai_agent import main
 
 if __name__ == "__main__":
     main()
