@@ -89,7 +89,7 @@ plugins:
   - search
   - mermaid2
   - print-site:
-      add_to_navigation: true
+      add_to_navigation: false
       print_page_title: 'Complete Documentation (Single Page)'
       enumerate_headings: true
       enumerate_figures: true
