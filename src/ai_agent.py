@@ -20,12 +20,14 @@ import sys
 import argparse
 import logging
 import time
+import hashlib
+import json
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple
 from functools import lru_cache
 from dotenv import load_dotenv
 
-from doc_generator import (
+from .doc_generator import (
     find_code_files,
     read_file_safe,
     build_prompt,
@@ -52,19 +54,109 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+class ResponseCache:
+    """Simple file-based cache for API responses."""
+
+    def __init__(self, cache_dir: str = ".cache", max_age_hours: int = 24, max_entries: int = 100):
+        self.cache_dir = Path(cache_dir)
+        self.cache_dir.mkdir(exist_ok=True)
+        self.max_age_hours = max_age_hours
+        self.max_entries = max_entries
+
+    def _get_cache_key(self, prompt: str, model: str) -> str:
+        """Generate cache key from prompt and model."""
+        content = f"{model}:{prompt}"
+        return hashlib.md5(content.encode('utf-8')).hexdigest()
+
+    def _get_cache_path(self, cache_key: str) -> Path:
+        """Get cache file path for a key."""
+        return self.cache_dir / f"{cache_key}.json"
+
+    def _clean_expired_entries(self):
+        """Remove expired cache entries and enforce max entries limit."""
+        try:
+            cache_files = list(self.cache_dir.glob("*.json"))
+            if len(cache_files) > self.max_entries:
+                # Sort by modification time, keep newest
+                cache_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+                for old_file in cache_files[self.max_entries:]:
+                    old_file.unlink()
+
+            # Remove expired entries
+            current_time = time.time()
+            max_age_seconds = self.max_age_hours * 3600
+
+            for cache_file in cache_files:
+                if current_time - cache_file.stat().st_mtime > max_age_seconds:
+                    cache_file.unlink()
+        except Exception as e:
+            logger.warning(f"Cache cleanup failed: {e}")
+
+    def get(self, prompt: str, model: str) -> Optional[str]:
+        """Get cached response for a prompt and model."""
+        if not self.cache_dir.exists():
+            return None
+
+        cache_key = self._get_cache_key(prompt, model)
+        cache_path = self._get_cache_path(cache_key)
+
+        try:
+            if cache_path.exists():
+                with open(cache_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    return data.get('response')
+        except Exception as e:
+            logger.warning(f"Cache read failed: {e}")
+
+        return None
+
+    def set(self, prompt: str, model: str, response: str):
+        """Cache a response for a prompt and model."""
+        try:
+            self._clean_expired_entries()
+
+            cache_key = self._get_cache_key(prompt, model)
+            cache_path = self._get_cache_path(cache_key)
+
+            data = {
+                'prompt': prompt[:200],  # Store truncated prompt for debugging
+                'model': model,
+                'response': response,
+                'timestamp': time.time()
+            }
+
+            with open(cache_path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+
+        except Exception as e:
+            logger.warning(f"Cache write failed: {e}")
+
+    def clear(self):
+        """Clear all cached entries."""
+        try:
+            for cache_file in self.cache_dir.glob("*.json"):
+                cache_file.unlink()
+        except Exception as e:
+            logger.warning(f"Cache clear failed: {e}")
+
+
 class AgentConfig:
     """Configuration management for AI Agent."""
-    
+
     def __init__(self):
         self.max_retries = int(os.getenv("MAX_RETRIES", "3"))
         self.retry_delay = int(os.getenv("RETRY_DELAY", "2"))
         self.critique_threshold = float(os.getenv("CRITIQUE_THRESHOLD", "0.8"))
         self.enable_caching = os.getenv("ENABLE_CACHING", "true").lower() == "true"
-        
+        self.cache_dir = os.getenv("CACHE_DIR", ".cache")
+        self.cache_max_age_hours = int(os.getenv("CACHE_MAX_AGE_HOURS", "24"))
+        self.cache_max_entries = int(os.getenv("CACHE_MAX_ENTRIES", "100"))
+
     def __repr__(self):
         return (f"AgentConfig(max_retries={self.max_retries}, "
                 f"retry_delay={self.retry_delay}, "
-                f"critique_threshold={self.critique_threshold})")
+                f"critique_threshold={self.critique_threshold}, "
+                f"caching={self.enable_caching})")
 
 
 class AIAgent:
@@ -107,8 +199,13 @@ class AIAgent:
         self.documentation: Optional[str] = None
         self.critique: Optional[str] = None
         self.config = config or AgentConfig()
+        self.cache = ResponseCache(
+            cache_dir=self.config.cache_dir,
+            max_age_hours=self.config.cache_max_age_hours,
+            max_entries=self.config.cache_max_entries
+        ) if self.config.enable_caching else None
         self.iteration_metrics: List[Dict[str, any]] = []
-        
+
         logger.info(f"AI Agent initialized with config: {self.config}")
 
     def run(self, max_iterations: int = 3) -> int:
@@ -324,41 +421,100 @@ Refined Documentation:
     def _is_critique_positive(self, critique: str) -> bool:
         """
         Check if the critique indicates documentation is satisfactory.
-        
+
+        Uses a scoring system to analyze critique content:
+        - Positive indicators increase score
+        - Negative indicators decrease score
+        - Length and specificity affect final decision
+
         Args:
             critique: Critique text
-            
+
         Returns:
-            True if critique is positive
+            True if critique is positive (score >= threshold)
         """
-        critique_lower = critique.lower()
-        positive_indicators = [
-            ("excellent", "no changes"),
-            ("perfect", "no changes"),
-            ("satisfactory", "no improvements"),
+        critique_lower = critique.lower().strip()
+
+        # Early exit for explicit positive statements
+        explicit_positive = [
+            "excellent and requires no changes",
+            "perfect and requires no changes",
+            "documentation is excellent",
+            "documentation is perfect",
+            "no changes needed",
+            "no improvements necessary",
+            "satisfactory as is"
         ]
-        
-        return any(
-            ind1 in critique_lower and ind2 in critique_lower 
-            for ind1, ind2 in positive_indicators
-        )
+
+        if any(phrase in critique_lower for phrase in explicit_positive):
+            return True
+
+        # Scoring system
+        score = 0
+
+        # Positive indicators (add points)
+        positive_words = [
+            "excellent", "perfect", "outstanding", "comprehensive", "well-written",
+            "clear", "concise", "accurate", "complete", "thorough", "professional",
+            "satisfactory", "good", "great", "fantastic"
+        ]
+
+        # Negative indicators (subtract points)
+        negative_words = [
+            "needs improvement", "requires changes", "missing", "incomplete", "unclear",
+            "confusing", "inaccurate", "poor", "lacks", "insufficient", "inadequate",
+            "problematic", "issues", "errors", "deficient"
+        ]
+
+        # Count positive and negative words
+        positive_count = sum(1 for word in positive_words if word in critique_lower)
+        negative_count = sum(1 for word in negative_words if word in critique_lower)
+
+        score += positive_count * 2
+        score -= negative_count * 3
+
+        # Length analysis - very short critiques are often positive
+        if len(critique.strip()) < 50:
+            score += 2
+
+        # Check for specific improvement requests
+        improvement_phrases = [
+            "should add", "consider adding", "recommend adding",
+            "needs to include", "missing section", "add section",
+            "improve", "enhance", "fix", "correct"
+        ]
+
+        improvement_requests = sum(1 for phrase in improvement_phrases if phrase in critique_lower)
+        score -= improvement_requests * 2
+
+        # Threshold for positive critique
+        threshold = self.config.critique_threshold * 10  # Convert to score scale
+
+        return score >= threshold
 
     def _call_ollama_with_retry(self, prompt: str, operation: str = "generation") -> str:
         """
-        Call Ollama API with exponential backoff retry logic.
-        
+        Call Ollama API with exponential backoff retry logic and caching.
+
         Args:
             prompt: Prompt to send
             operation: Description of the operation (for logging)
-            
+
         Returns:
             API response text
-            
+
         Raises:
             DocGeneratorError: If all retries fail
         """
+        # Check cache first if enabled
+        if self.cache and self.config.enable_caching:
+            cached_response = self.cache.get(prompt, self.model)
+            if cached_response:
+                logger.info(f"Using cached response for {operation}")
+                return cached_response
+
         import requests
-        
+
         for attempt in range(self.config.max_retries):
             try:
                 logger.info(f"Sending {operation} request to Ollama (attempt {attempt + 1})")
@@ -380,9 +536,15 @@ Refined Documentation:
                 
                 if not content:
                     raise DocGeneratorError("Invalid API response format from Ollama")
-                
+
+                content = content.strip()
+
+                # Cache the response if caching is enabled
+                if self.cache and self.config.enable_caching:
+                    self.cache.set(prompt, self.model, content)
+
                 logger.info(f"{operation.capitalize()} completed successfully")
-                return content.strip()
+                return content
                 
             except requests.Timeout:
                 logger.warning(f"Timeout on attempt {attempt + 1}")
@@ -407,7 +569,8 @@ Refined Documentation:
         logger.info(f"Total time: {total_time:.2f}s")
         logger.info(f"Files analyzed: {len(self.file_contents)}")
         logger.info(f"Iterations: {len(self.iteration_metrics)}")
-        
+        logger.info(f"Caching: {'enabled' if self.config.enable_caching else 'disabled'}")
+
         for metric in self.iteration_metrics:
             logger.info(
                 f"  Iteration {metric['iteration']}: "
@@ -415,6 +578,14 @@ Refined Documentation:
                 f"{metric['doc_length']:,} chars"
             )
         logger.info("="*60)
+
+    def clear_cache(self):
+        """Clear the response cache."""
+        if self.cache:
+            self.cache.clear()
+            logger.info("Cache cleared successfully")
+        else:
+            logger.info("Caching is disabled")
 
 
 def main():

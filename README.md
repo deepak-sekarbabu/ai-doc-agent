@@ -8,12 +8,13 @@ An intelligent, self-improving AI agent that autonomously generates, critiques, 
 ## ✨ Features
 
 - 🔄 **Iterative Self-Refinement** - AI critiques and improves its own output
-- 🤖 **Powered by Ollama** - Uses local LLM for intelligent analysis
+- 🤖 **Powered by Ollama** - Uses local or cloud LLM for intelligent analysis
 - 📊 **Multi-Format Output** - Markdown, HTML, and PDF support
 - 🎯 **Smart File Prioritization** - Automatically identifies important files
 - 🔍 **Auto-Detection** - Detects project type (frontend/backend/mixed)
 - ✅ **Production Ready** - Logging, retries, validation, error handling
 - 📝 **Docstring Extraction** - Incorporates existing code documentation
+- 🚀 **Response Caching** - Speeds up repeated runs with intelligent caching
 
 ## 🚀 Quick Start
 
@@ -131,8 +132,8 @@ cp config/.env.example .env
 Edit `.env` with your settings:
 
 ```bash
-# Ollama API Configuration
-OLLAMA_API_URL=http://localhost:11434/api/generate
+# Ollama Configuration
+OLLAMA_MODE=local  # or 'cloud' for ollama.com
 MODEL_NAME=llama2:7b
 API_TIMEOUT=300
 
@@ -142,6 +143,17 @@ RETRY_DELAY=2
 ENABLE_CACHING=true
 CRITIQUE_THRESHOLD=0.8
 ```
+
+**Configuration Options:**
+
+- **`OLLAMA_MODE`**: Set to `local` for localhost Ollama, `cloud` for ollama.com
+- **`MODEL_NAME`**:
+  - Local: `llama2:7b`, `mistral:7b`, `codellama:7b`, `phi:2.7b`
+  - Cloud: `gpt-oss:120b-cloud`, `llama2:70b-chat`, `codellama:34b`
+- **`ENABLE_CACHING`**: Enable/disable response caching to speed up repeated runs
+- **`CACHE_DIR`**: Directory for cached API responses (default: `.cache`)
+- **`CACHE_MAX_AGE_HOURS`**: How long to keep cached responses (default: 24)
+- **`CACHE_MAX_ENTRIES`**: Maximum number of cached responses (default: 100)
 
 ## 📦 Installation Methods
 
@@ -261,7 +273,32 @@ The agent generates comprehensive documentation including:
 
 ## 🧪 Testing
 
-Try it with the included sample project:
+### Run Tests Locally
+
+```bash
+# Install test dependencies
+pip install -e .[dev]
+
+# Run all tests
+pytest
+
+# Run with coverage
+pytest --cov=src --cov-report=html
+
+# Run specific tests
+pytest tests/test_doc_generator.py -v
+```
+
+### CI/CD
+
+This project uses GitHub Actions for continuous integration:
+
+- **Automated Testing**: Runs on multiple Python versions (3.8-3.12)
+- **Code Quality**: Black formatting, Flake8 linting, MyPy type checking
+- **Coverage**: Codecov integration for test coverage reporting
+- **Build Verification**: Package building and validation
+
+### Try with Sample Project
 
 ```bash
 # Generate docs for the sample calculator
@@ -283,12 +320,21 @@ cat output/sample_docs.md
 
 ### Cannot connect to Ollama
 
+**For Local Ollama:**
 ```bash
 # Ensure Ollama is running
 ollama serve
 
-# Check the URL in .env
-OLLAMA_API_URL=http://localhost:11434/api/generate
+# Check your .env configuration
+OLLAMA_MODE=local
+MODEL_NAME=llama2:7b
+```
+
+**For Cloud Ollama:**
+```bash
+# Check your .env configuration
+OLLAMA_MODE=cloud
+MODEL_NAME=gpt-oss:120b-cloud
 ```
 
 ### API Timeout
@@ -336,9 +382,17 @@ Contributions are welcome! Please read our [Contributing Guide](https://deepak-s
 The organized structure makes it easy:
 
 - **Add features** in `src/`
-- **Add tests** in `tests/`
+- **Add tests** in `tests/` (required for CI/CD)
 - **Update docs** in `docs/`
 - **Add examples** in `examples/`
+
+### Code Quality Requirements
+
+All contributions must pass:
+- **Tests**: `pytest` with >80% coverage
+- **Linting**: `black` formatting and `flake8` checks
+- **Type Checking**: `mypy` validation
+- **CI/CD**: GitHub Actions workflow
 
 See [Testing Guide](https://deepak-sekarbabu.github.io/ai-doc-agent/development/testing/) for testing instructions.
 
@@ -366,8 +420,8 @@ Built with:
 - ✅ Core Features - Complete
 - ✅ Documentation - Complete
 - ✅ Bundling Options - Complete
-- 🔄 Unit Tests - In Progress
-- 🔄 CI/CD Pipeline - Planned
+- ✅ Unit Tests - Complete
+- ✅ CI/CD Pipeline - Complete
 
 ---
 

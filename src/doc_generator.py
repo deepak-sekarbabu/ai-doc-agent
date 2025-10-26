@@ -20,7 +20,13 @@ import pdfkit
 
 load_dotenv()
 
-OLLAMA_API_URL = os.getenv("OLLAMA_API_URL", "https://ollama.com/api/generate")
+# Configure Ollama API URL based on mode
+OLLAMA_MODE = os.getenv("OLLAMA_MODE", "cloud").lower()
+if OLLAMA_MODE == "local":
+    OLLAMA_API_URL = os.getenv("OLLAMA_API_URL", "http://localhost:11434/api/generate")
+else:
+    OLLAMA_API_URL = os.getenv("OLLAMA_API_URL", "https://ollama.com/api/generate")
+
 MODEL_NAME = os.getenv("MODEL_NAME", "gpt-oss:120b-cloud")
 API_TIMEOUT = int(os.getenv("API_TIMEOUT", "300"))
 
@@ -211,11 +217,21 @@ def get_ollama_headers() -> Dict[str, str]:
 def check_ollama_connection() -> bool:
     """Verify Ollama API is accessible."""
     try:
-        response = requests.get(
-            "https://ollama.com/", 
-            headers=get_ollama_headers(), 
-            timeout=5
-        )
+        # For cloud mode, check the base domain; for local, check the API endpoint
+        if OLLAMA_MODE == "local":
+            # Check if local Ollama is running by trying to access the API endpoint
+            response = requests.get(
+                "http://localhost:11434/api/tags",
+                headers=get_ollama_headers(),
+                timeout=5
+            )
+        else:
+            # For cloud mode, check the base domain
+            response = requests.get(
+                "https://ollama.com/",
+                headers=get_ollama_headers(),
+                timeout=5
+            )
         return response.status_code == 200
     except requests.RequestException:
         return False
