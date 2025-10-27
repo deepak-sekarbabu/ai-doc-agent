@@ -4,12 +4,12 @@ This document provides a comprehensive overview of the `ai-doc-agent` project, d
 
 ## Project Overview
 
-The `ai-doc-agent` is a sophisticated Python-based tool that automates the generation of technical documentation for code projects. It leverages Large Language Models (LLMs) through Ollama to analyze a codebase, generate initial documentation, and then iteratively critique and refine its own output to improve quality.
+The `ai-doc-agent` is a sophisticated Python-based tool that automates the generation of technical documentation for code projects. It leverages Large Language Models (LLMs) through Ollama to analyze a codebase, generate initial documentation, and then iteratively critique and refine its own output to improve quality. This iterative process is implemented as a stateful graph using LangGraph.
 
 **Key Technologies:**
 
 *   **Backend:** Python
-*   **AI/LLM:** Ollama (local or cloud)
+*   **AI/LLM:** Ollama (local or cloud), LangChain, LangGraph
 *   **Dependencies:** `requests` (for API calls), `markdown`, `pdfkit` (for output formats).
 *   **Documentation:** `MkDocs` with the `Material` theme.
 *   **Testing:** `pytest`
@@ -43,7 +43,7 @@ The `.env` file contains settings for Ollama (mode, model name), API timeouts, a
 
 ### 3. Running the Agent
 
-The primary entry point is `run.py`, which executes the main AI agent from `src/ai_agent.py`.
+The primary entry point is `run.py`, which executes the main AI agent from `src/langgraph_agent.py`.
 
 **To run the agent:**
 

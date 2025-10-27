@@ -5,7 +5,8 @@ The AI Documentation Agent follows a standard Python project structure:
 ```
 Docgenerator/
 ├── src/                    # Source code
-│   ├── ai_agent.py        # Main AI agent with critique loop
+│   ├── langgraph_agent.py # Main AI agent using LangGraph (default)
+│   ├── ai_agent.py        # Original AI agent with manual critique loop
 │   ├── doc_generator.py   # Core documentation utilities
 │   └── __init__.py        # Package initialization
 ├── config/                 # Configuration files
@@ -39,8 +40,9 @@ Docgenerator/
 ### src/
 Contains all the source code for the AI Documentation Agent.
 
-- **ai_agent.py**: Main AI agent implementation with the critique-refinement loop
-- **doc_generator.py**: Utilities for file discovery, processing, and documentation generation
+- **langgraph_agent.py**: Main AI agent implementation using LangGraph (default).
+- **ai_agent.py**: Original AI agent implementation with a manual critique-refinement loop.
+- **doc_generator.py**: Utilities for file discovery, processing, and documentation generation.
 
 ### config/
 Configuration files for the project.

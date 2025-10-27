@@ -31,9 +31,6 @@ ollama pull llama2:7b
 
 # 4. Run the agent
 python run.py --directory ./your-project
-
-# Or use directly
-python src/ai_agent.py --directory ./your-project --format html
 ```
 
 ## 📁 Project Structure
@@ -41,7 +38,8 @@ python src/ai_agent.py --directory ./your-project --format html
 ```
 Docgenerator/
 ├── src/                    # Source code
-│   ├── ai_agent.py        # Main AI agent with critique loop
+│   ├── langgraph_agent.py # Main AI agent using LangGraph (default)
+│   ├── ai_agent.py        # Original AI agent with manual critique loop
 │   ├── doc_generator.py   # Core documentation utilities
 │   └── __init__.py        # Package initialization
 ├── config/                 # Configuration files
@@ -195,7 +193,7 @@ See [Deployment Documentation](https://deepak-sekarbabu.github.io/ai-doc-agent/d
 
 ## 🎯 How It Works
 
-The AI agent follows an iterative improvement workflow:
+The AI agent follows an iterative improvement workflow, implemented as a stateful graph using LangGraph:
 
 ```mermaid
 graph TD
@@ -404,6 +402,7 @@ MIT License - see LICENSE file for details
 
 Built with:
 - [Ollama](https://ollama.ai/) - Local LLM inference
+- [LangChain](https://www.langchain.com/) & [LangGraph](https://langchain-ai.github.io/langgraph/) - AI agent framework
 - [PyInstaller](https://pyinstaller.org/) - Executable bundling
 - [Docker](https://www.docker.com/) - Containerization
 

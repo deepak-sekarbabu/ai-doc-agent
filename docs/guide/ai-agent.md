@@ -4,11 +4,11 @@ Complete guide to using the AI Documentation Agent with iterative refinement.
 
 ## Overview
 
-The AI Agent (`src/ai_agent.py`) is the flagship feature of this tool. It uses an iterative critique-refine cycle to generate high-quality documentation that improves with each iteration.
+The AI Agent (`src/langgraph_agent.py`) is the flagship feature of this tool. It is built using LangGraph and uses an iterative critique-refine cycle to generate high-quality documentation that improves with each iteration.
 
 ## How It Works
 
-The AI Agent follows a sophisticated workflow:
+The AI Agent follows a sophisticated workflow, which is implemented as a stateful graph using LangGraph:
 
 ```mermaid
 graph TD
@@ -105,19 +105,7 @@ python run.py --directory ~/my-project
 python run.py --directory ~/my-app --output my_documentation
 ```
 
-### Advanced Usage
 
-```bash
-# Full control with ai_agent.py
-python src/ai_agent.py \
-  --directory ~/my-project \
-  --iterations 5 \
-  --max-files 100 \
-  --model codellama \
-  --format html \
-  --output comprehensive_docs \
-  --verbose
-```
 
 ### Command-Line Options
 
@@ -378,7 +366,7 @@ ENABLE_CACHING=true
 
 ### Custom Prompts
 
-You can customize the prompts by editing `src/ai_agent.py`:
+You can customize the prompts by editing `src/langgraph_agent.py`:
 
 ```python
 def _build_critique_prompt(self, documentation: str) -> str:

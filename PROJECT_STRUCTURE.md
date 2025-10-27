@@ -8,7 +8,8 @@ This document explains the organized structure of the AI Documentation Agent pro
 Docgenerator/
 │
 ├── 📁 src/                          # Source Code
-│   ├── ai_agent.py                  # Main AI agent with iterative refinement
+│   ├── langgraph_agent.py           # Main AI agent using LangGraph (default)
+│   ├── ai_agent.py                  # Original AI agent with manual critique loop
 │   ├── doc_generator.py             # Core documentation generator
 │   └── __init__.py                  # Package initialization
 │
@@ -59,7 +60,8 @@ Docgenerator/
 
 Contains the core application logic:
 
-- **ai_agent.py** - Main AI agent with critique/refine loop
+- **langgraph_agent.py** - Main AI agent implementation using LangGraph (default).
+- **ai_agent.py** - Original AI agent implementation with a manual critique-refinement loop.
 - **doc_generator.py** - Documentation generation utilities
 - **__init__.py** - Package exports and version info
 
@@ -140,9 +142,6 @@ Default location for generated documentation (gitignored)
 ```bash
 # From project root
 python run.py --directory ./my-project
-
-# Direct execution
-python src/ai_agent.py --directory ./my-project
 
 # After pip install
 ai-doc-agent --directory ./my-project
