@@ -524,21 +524,23 @@ def convert_to_pdf(markdown_content: str, output_path: str) -> None:
     })
 
 
-def save_documentation(content: str, output_format: str, output_file: Optional[str] = None) -> str:
+def save_documentation(content: str, output_format: str, output_file: Optional[str] = None, output_dir: Optional[Path] = None) -> str:
     """
     Save documentation to file.
-    
+
     Args:
         content: Documentation content
         output_format: Output format (markdown, html, pdf)
         output_file: Optional output filename (without extension)
-        
+        output_dir: Optional output directory path
+
     Returns:
         Path to saved file
     """
     # Create output directory if it doesn't exist
-    output_dir = Path("output")
-    output_dir.mkdir(exist_ok=True)
+    if output_dir is None:
+        output_dir = Path("output")
+    output_dir.mkdir(exist_ok=True, parents=True)
     
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     base_name = output_file.rsplit('.', 1)[0] if output_file else f"documentation_{timestamp}"

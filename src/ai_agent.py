@@ -255,9 +255,10 @@ class AIAgent:
                 logger.warning("Max refinement iterations reached without positive critique.")
             
             output_path = save_documentation(
-                self.documentation, 
-                self.output_format, 
-                self.output_file
+                self.documentation,
+                self.output_format,
+                self.output_file,
+                output_dir=self.directory / "output"
             )
             
             total_time = time.time() - start_time
