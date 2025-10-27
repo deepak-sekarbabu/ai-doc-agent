@@ -203,3 +203,4 @@ secrets.txt
 # AI Agent Cache
 # =======================================
 .cache/
+.knowledge_base/
