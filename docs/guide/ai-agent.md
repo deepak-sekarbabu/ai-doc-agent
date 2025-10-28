@@ -4,7 +4,9 @@ Complete guide to using the AI Documentation Agent with iterative refinement.
 
 ## Overview
 
-The AI Agent (`src/langgraph_agent.py`) is the flagship feature of this tool. It is built using LangGraph and uses an iterative critique-refine cycle to generate high-quality documentation that improves with each iteration.
+The AI Agent (`src/langgraph_agent.py`) is the default implementation of the documentation agent, built using LangGraph. It uses an iterative critique-refine cycle to generate high-quality documentation that improves with each iteration.
+
+> **Note**: This guide covers the LangGraph-based implementation. The project also includes an [original AIAgent implementation](../features/agent-implementations.md) with a different architectural approach.
 
 ## How It Works
 

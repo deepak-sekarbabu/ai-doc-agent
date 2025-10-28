@@ -110,6 +110,7 @@ nav:
     - Iterative Refinement: features/iterative-refinement.md
     - Project Detection: features/project-detection.md
     - Multi-Format Output: features/output-formats.md
+    - Agent Implementations: features/agent-implementations.md
   - Deployment:
     - Bundling Guide: deployment/bundling.md
     - Docker: deployment/docker.md

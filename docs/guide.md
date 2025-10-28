@@ -439,7 +439,7 @@ For each file:
 
 ### Custom Prompts
 
-Edit `src/ai_agent.py` to customize prompts:
+Edit either `src/ai_agent.py` or `src/langgraph_agent.py` to customize prompts:
 
 ```python
 def _build_critique_prompt(self, documentation: str) -> str:
@@ -453,6 +453,8 @@ def _build_critique_prompt(self, documentation: str) -> str:
     {documentation}
     """
 ```
+
+> **Note**: The project provides two agent implementations. See [Agent Implementations Comparison](features/agent-implementations.md) for details on both approaches.
 
 ### Adding New File Types
 
@@ -521,6 +523,8 @@ agent = AIAgent(
 # Run documentation generation
 exit_code = agent.run(max_iterations=5)
 ```
+
+> **Note**: This documents the original [AIAgent](file:///c:/Projects/ai-doc-agent/src/ai_agent.py#L174-L443) implementation. The project also provides a [LangGraph-based implementation](features/agent-implementations.md).
 
 ### Standalone Functions
 

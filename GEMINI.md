@@ -43,7 +43,7 @@ The `.env` file contains settings for Ollama (mode, model name), API timeouts, a
 
 ### 3. Running the Agent
 
-The primary entry point is `run.py`, which executes the main AI agent from `src/langgraph_agent.py`.
+The primary entry point is `run.py`, which executes the main AI agent from `src/langgraph_agent.py` (the LangGraph-based implementation). The project also provides an original implementation in `src/ai_agent.py`.
 
 **To run the agent:**
 

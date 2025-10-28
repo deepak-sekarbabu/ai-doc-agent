@@ -10,7 +10,9 @@ Docgenerator/
 ├── 📁 src/                          # Source Code
 │   ├── langgraph_agent.py           # Main AI agent using LangGraph (default)
 │   ├── ai_agent.py                  # Original AI agent with manual critique loop
+│   ├── base_agent.py                # Base agent class
 │   ├── doc_generator.py             # Core documentation generator
+│   ├── utils/                       # Utility functions
 │   └── __init__.py                  # Package initialization
 │
 ├── 📁 config/                       # Configuration Files
@@ -60,9 +62,11 @@ Docgenerator/
 
 Contains the core application logic:
 
-- **langgraph_agent.py** - Main AI agent implementation using LangGraph (default).
-- **ai_agent.py** - Original AI agent implementation with a manual critique-refinement loop.
+- **langgraph_agent.py** - Main AI agent implementation using LangGraph (default). See [Agent Implementations Comparison](../docs/features/agent-implementations.md) for details.
+- **ai_agent.py** - Original AI agent implementation with a manual critique-refinement loop. See [Agent Implementations Comparison](../docs/features/agent-implementations.md) for details.
+- **base_agent.py** - Base agent class with common functionality
 - **doc_generator.py** - Documentation generation utilities
+- **utils/** - Utility functions and helpers
 - **__init__.py** - Package exports and version info
 
 ### config/ - Configuration

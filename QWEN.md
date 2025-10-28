@@ -41,7 +41,7 @@ The AI Documentation Agent is an intelligent, self-improving AI system that auto
 
 ### Core Components
 
-#### 1. `langgraph_agent.py` (Default Main Entry Point)
+#### 1. `langgraph_agent.py` (Default Implementation)
 - Implements the AI agent using LangGraph for stateful graph-based processing
 - Uses a state machine pattern with nodes for analysis, generation, critique, and refinement
 - Handles iterative improvement cycles until quality threshold is met or max iterations reached
@@ -50,6 +50,8 @@ The AI Documentation Agent is an intelligent, self-improving AI system that auto
 - Original AI agent implementation with manual critique-refinement loop
 - Includes caching, retry logic, and comprehensive error handling
 - Implements scoring system for determining when documentation is satisfactory
+
+> See [Agent Implementations Comparison](docs/features/agent-implementations.md) for a detailed comparison of both approaches.
 
 #### 3. `base_agent.py`
 - Abstract base class for documentation generation agents

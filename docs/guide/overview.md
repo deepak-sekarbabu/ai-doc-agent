@@ -123,36 +123,49 @@ Saves final documentation:
 - Saves to output directory
 - Reports metrics and statistics
 
-## Two Modes of Operation
+## Agent Implementations
 
-### Mode 1: AI Agent (Recommended)
+The AI Documentation Agent provides two different implementations for generating documentation, both following the same iterative refinement approach:
+
+### Implementation 1: LangGraph Agent (Default)
+
+**File:** `src/langgraph_agent.py`
+
+The default implementation using LangGraph for workflow management:
+
+```bash
+python run.py --directory ./my-project --iterations 5
+# or explicitly
+python src/langgraph_agent.py --directory ./my-project --iterations 5
+```
+
+**Architecture:**
+- Uses LangGraph for state machine-based workflow
+- Declarative graph definition
+- Automatic state management
+
+### Implementation 2: Original AIAgent
 
 **File:** `src/ai_agent.py`
 
-The full AI agent with iterative refinement:
+The original implementation with manual loop control:
 
 ```bash
 python src/ai_agent.py --directory ./my-project --iterations 5
 ```
 
-**Features:**
-- ✅ Iterative refinement
-- ✅ Self-critique
-- ✅ Quality improvement
-- ✅ Multiple iterations
-- ✅ Best quality output
+**Architecture:**
+- Traditional procedural approach
+- Manual loop control
+- Class-based state management
 
-**When to use:**
-- Production documentation
-- Comprehensive project docs
-- High-quality requirements
-- You have time for multiple iterations
+> See [Agent Implementations Comparison](../features/agent-implementations.md) for a detailed comparison of both approaches.
 
-### Mode 2: Simple Generator
+## Simple Generator Mode
 
 **File:** `src/doc_generator.py`
 
-Quick, single-pass documentation:
+Quick, single-pass documentation without iterative refinement:
 
 ```bash
 python src/doc_generator.py ./my-project

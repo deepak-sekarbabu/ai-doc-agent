@@ -38,9 +38,11 @@ python run.py --directory ./your-project
 ```
 Docgenerator/
 ├── src/                    # Source code
-│   ├── langgraph_agent.py # Main AI agent using LangGraph (default)
+│   ├── langgraph_agent.py # LangGraph-based AI agent (default)
 │   ├── ai_agent.py        # Original AI agent with manual critique loop
+│   ├── base_agent.py      # Base agent class
 │   ├── doc_generator.py   # Core documentation utilities
+│   ├── utils/             # Utility functions
 │   └── __init__.py        # Package initialization
 ├── config/                 # Configuration files
 │   ├── .env.example       # Environment template
@@ -88,14 +90,28 @@ python run.py --directory ./project --format html --output docs
 ### Advanced Usage
 
 ```bash
-# Maximum quality with more refinement iterations
+# Maximum quality with more refinement iterations (LangGraph implementation)
+python run.py \
+  --directory ~/my-app \
+  --iterations 5 \
+  --max-files 100 \
+  --verbose
+
+# Maximum quality with more refinement iterations (Original implementation)
 python src/ai_agent.py \
   --directory ~/my-app \
   --iterations 5 \
   --max-files 100 \
   --verbose
 
-# Specify project type and model
+# Specify project type and model (LangGraph implementation)
+python run.py \
+  --directory ./backend-api \
+  --project-type backend \
+  --model codellama \
+  --format pdf
+
+# Specify project type and model (Original implementation)
 python src/ai_agent.py \
   --directory ./backend-api \
   --project-type backend \
@@ -207,6 +223,8 @@ graph TD
     H --> E
     G --> I[Report Metrics]
 ```
+
+> **Note**: The project provides two agent implementations: the original [AIAgent](src/ai_agent.py#L174-L443) with manual loop control and the LangGraph-based agent. See [Agent Implementations Comparison](https://deepak-sekarbabu.github.io/ai-doc-agent/features/agent-implementations/) for details on both approaches.
 
 ### Workflow Steps
 
