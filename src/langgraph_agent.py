@@ -12,19 +12,10 @@ import argparse
 import logging
 from pathlib import Path
 from typing import List, Dict, Optional, TypedDict
-from concurrent.futures import ThreadPoolExecutor, as_completed
-
 from langgraph.graph import StateGraph, END
 from dotenv import load_dotenv
 
-# Assuming the original doc_generator functions are compatible or will be adapted
-from .doc_generator import (
-    find_code_files,
-    read_file_safe,
-    save_documentation,
-    detect_project_type,
-    DocGeneratorError,
-)
+from .doc_generator import save_documentation
 from .ai_agent import AIAgent
 from .base_agent import AgentConfig
 

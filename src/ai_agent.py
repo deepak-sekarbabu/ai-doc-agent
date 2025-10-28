@@ -23,8 +23,7 @@ import time
 import hashlib
 import json
 from pathlib import Path
-from typing import List, Dict, Optional, Tuple, Union
-from functools import lru_cache
+from typing import List, Dict, Optional, Union
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dotenv import load_dotenv
 

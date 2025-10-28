@@ -8,6 +8,7 @@ Supports multiple output formats (Markdown, HTML, PDF) and intelligent file prio
 
 import os
 import sys
+import logging
 from pathlib import Path
 from typing import List, Dict, Optional
 from datetime import datetime
@@ -17,6 +18,8 @@ import requests
 from dotenv import load_dotenv
 import markdown
 import pdfkit
+
+logger = logging.getLogger(__name__)
 
 from .base_agent import DocumentationTemplates
 
@@ -175,7 +178,7 @@ def read_file_safe(file_path: str) -> Optional[str]:
         with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
             return f.read()
     except (IOError, OSError) as e:
-        print(f"Warning: Could not read {file_path}: {e}", file=sys.stderr)
+        logger.warning(f"Could not read {file_path}: {e}")
         return None
 
 
@@ -302,8 +305,8 @@ def generate_documentation(
         project_type
     )
     
-    print(f"Sending request to Ollama API (model: {model})...")
-    print(f"Prompt: {len(prompt)} chars (~{len(prompt) // 4} tokens)")
+    logger.info(f"Sending request to Ollama API (model: {model})")
+    logger.debug(f"Prompt: {len(prompt)} chars (~{len(prompt) // 4} tokens)")
     
     try:
         response = requests.post(
@@ -331,7 +334,7 @@ def generate_documentation(
         doc = re.sub(r"```.*?```", "", doc, flags=re.DOTALL)
         doc = re.sub(r"<think>.*?</think>", "", doc, flags=re.DOTALL)
         
-        print("Documentation generated successfully")
+        logger.info("Documentation generated successfully")
         return doc
         
     except requests.Timeout:
@@ -445,10 +448,10 @@ def save_documentation(content: str, output_format: str, output_file: Optional[s
     if output_dir is None:
         output_dir = Path("output")
     output_dir.mkdir(exist_ok=True, parents=True)
-    
+
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     base_name = output_file.rsplit('.', 1)[0] if output_file else f"documentation_{timestamp}"
-    
+
     if output_format.lower() == "html":
         filename = output_dir / f"{base_name}.html"
         final_content = convert_markdown_to_html(content)
@@ -458,18 +461,16 @@ def save_documentation(content: str, output_format: str, output_file: Optional[s
         filename = output_dir / f"{base_name}.pdf"
         try:
             convert_to_pdf(content, str(filename))
-            print("PDF generated successfully")
+            logger.info("PDF generated successfully")
         except Exception as e:
-            print(f"PDF generation failed: {e}")
-            print("Falling back to Markdown format...")
+            logger.warning(f"PDF generation failed: {e}. Falling back to Markdown format...")
             filename = output_dir / f"{base_name}.md"
             with open(filename, "w", encoding="utf-8") as f:
                 f.write(content)
-            print("\nNote: Install wkhtmltopdf for PDF support:")
-            print("Windows: choco install wkhtmltopdf or download from https://wkhtmltopdf.org/downloads.html")
+            logger.info("Note: Install wkhtmltopdf for PDF support: https://wkhtmltopdf.org/downloads.html")
     else:
         filename = output_dir / f"{base_name}.md"
         with open(filename, "w", encoding="utf-8") as f:
             f.write(content)
-    
+
     return str(filename)
