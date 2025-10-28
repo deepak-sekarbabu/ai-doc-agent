@@ -38,16 +38,37 @@ class GenerationError(AgentError):
 
 @dataclass
 class AgentConfig:
-    """Configuration for AI agents with environment variable loading."""
+    """
+    Configuration for AI agents with environment variable loading.
+    
+    This class holds all configuration parameters for the AI agent, with values
+    loaded from environment variables by default. It includes validation to ensure
+    all parameters are within acceptable ranges.
+    """
 
     max_retries: int = field(default_factory=lambda: int(os.getenv("MAX_RETRIES", "3")))
+    """Maximum number of retry attempts for API calls."""
+    
     retry_delay: int = field(default_factory=lambda: int(os.getenv("RETRY_DELAY", "2")))
+    """Base delay in seconds between retry attempts (exponential backoff)."""
+    
     critique_threshold: float = field(default_factory=lambda: float(os.getenv("CRITIQUE_THRESHOLD", "0.8")))
+    """Threshold score (0.0-1.0) for determining if critique is satisfactory."""
+    
     enable_caching: bool = field(default_factory=lambda: os.getenv("ENABLE_CACHING", "true").lower() == "true")
+    """Whether to enable response caching to avoid redundant API calls."""
+    
     cache_dir: str = field(default_factory=lambda: os.getenv("CACHE_DIR", ".cache"))
+    """Directory for storing cached API responses."""
+    
     cache_max_age_hours: int = field(default_factory=lambda: int(os.getenv("CACHE_MAX_AGE_HOURS", "24")))
+    """Maximum age in hours for cached responses before expiration."""
+    
     cache_max_entries: int = field(default_factory=lambda: int(os.getenv("CACHE_MAX_ENTRIES", "100")))
+    """Maximum number of entries to keep in the cache."""
+    
     api_timeout: int = field(default_factory=lambda: int(os.getenv("API_TIMEOUT", "300")))
+    """Timeout in seconds for API requests."""
 
     def __post_init__(self):
         """Validate configuration values."""
@@ -88,7 +109,7 @@ class BaseAgent(ABC):
         output_format: str,
         output_file: Optional[str],
         config: AgentConfig,
-    ):
+    ) -> None:
         self.directory = Path(directory).resolve()
         self.max_files = max_files
         self.model = model
@@ -148,7 +169,13 @@ class BaseAgent(ABC):
 
 
 class DocumentationTemplates:
-    """Templates for documentation generation prompts."""
+    """
+    Templates for documentation generation prompts.
+    
+    This class contains pre-defined prompt templates used for generating, critiquing,
+    and refining technical documentation. The prompts are designed to guide LLMs in
+    producing high-quality, comprehensive documentation.
+    """
 
     CRITIQUE_PROMPT = """You are a senior quality assurance engineer and technical documentation expert.
 
@@ -202,7 +229,15 @@ Refined Documentation:
 
     @staticmethod
     def get_project_description(project_type: str) -> str:
-        """Get project-specific description for documentation generation."""
+        """
+        Get project-specific description for documentation generation.
+        
+        Args:
+            project_type: Type of project ('frontend', 'backend', or 'mixed')
+            
+        Returns:
+            Project-specific instructions for the LLM
+        """
         descriptions = {
             "frontend": """
 You are a senior technical documentation writer. Analyze the following frontend codebase
@@ -232,7 +267,15 @@ client-side and server-side architecture, their integration, and communication p
 
     @staticmethod
     def get_format_instructions(output_format: str) -> str:
-        """Get format-specific instructions."""
+        """
+        Get format-specific instructions for documentation generation.
+        
+        Args:
+            output_format: Desired output format ('markdown', 'html', or 'pdf')
+            
+        Returns:
+            Format-specific instructions for the LLM
+        """
         instructions = {
             "html": "Generate documentation in HTML format with proper HTML5 structure.",
             "pdf": "Generate documentation in Markdown format that will be converted to PDF.",
@@ -247,7 +290,18 @@ client-side and server-side architecture, their integration, and communication p
         output_format: str,
         project_type: str
     ) -> str:
-        """Build the main documentation generation prompt."""
+        """
+        Build the main documentation generation prompt.
+        
+        Args:
+            file_summaries: Summaries of code files to document
+            docstring_info: Extracted docstrings and JSDocs from code
+            output_format: Desired output format
+            project_type: Type of project being documented
+            
+        Returns:
+            Complete prompt for documentation generation
+        """
         project_intro = DocumentationTemplates.get_project_description(project_type)
         format_instructions = DocumentationTemplates.get_format_instructions(output_format)
 

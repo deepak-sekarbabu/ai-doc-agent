@@ -28,17 +28,12 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dotenv import load_dotenv
 
 from .doc_generator import (
-    find_code_files,
-    read_file_safe,
-    OLLAMA_API_URL,
-    MODEL_NAME,
-    API_TIMEOUT,
-    get_ollama_headers,
     DocGeneratorError,
     save_documentation,
-    detect_project_type,
     generate_documentation
 )
+from .utils.file_utils import find_code_files, read_file_safe, detect_project_type
+from .utils.api_utils import call_ollama_api, get_ollama_headers, OLLAMA_API_URL, MODEL_NAME, API_TIMEOUT
 from .base_agent import BaseAgent, AgentConfig, DocumentationTemplates
 
 load_dotenv()
@@ -430,59 +425,16 @@ class AIAgent(BaseAgent):
         Raises:
             DocGeneratorError: If all retries fail
         """
-        # Check cache first if enabled
-        if self.cache and self.config.enable_caching:
-            cached_response = self.cache.get(prompt, self.model)
-            if cached_response:
-                logger.info(f"Using cached response for {operation}")
-                return cached_response
-
-        import requests
-
-        for attempt in range(self.config.max_retries):
-            try:
-                logger.info(f"Sending {operation} request to Ollama (attempt {attempt + 1})")
-                
-                response = requests.post(
-                    OLLAMA_API_URL,
-                    json={
-                        "model": self.model,
-                        "prompt": prompt,
-                        "stream": False,
-                    },
-                    headers=get_ollama_headers(),
-                    timeout=self.config.api_timeout
-                )
-                response.raise_for_status()
-                
-                resp_data = response.json()
-                content = resp_data.get("response") or resp_data.get("text", "")
-                
-                if not content:
-                    raise DocGeneratorError("Invalid API response format from Ollama")
-
-                content = content.strip()
-
-                # Cache the response if caching is enabled
-                if self.cache and self.config.enable_caching:
-                    self.cache.set(prompt, self.model, content)
-
-                logger.info(f"{operation.capitalize()} completed successfully")
-                return content
-                
-            except requests.Timeout:
-                logger.warning(f"Timeout on attempt {attempt + 1}")
-                if attempt < self.config.max_retries - 1:
-                    time.sleep(self.config.retry_delay * (2 ** attempt))
-                else:
-                    raise DocGeneratorError(f"API timeout after {self.config.max_retries} attempts")
-                    
-            except requests.RequestException as e:
-                logger.error(f"Request failed on attempt {attempt + 1}: {e}")
-                if attempt < self.config.max_retries - 1:
-                    time.sleep(self.config.retry_delay * (2 ** attempt))
-                else:
-                    raise DocGeneratorError(f"API request failed after {self.config.max_retries} attempts: {e}")
+        # Use utility function for API calls with caching
+        return call_ollama_api(
+            prompt=prompt,
+            model=self.model,
+            max_retries=self.config.max_retries,
+            retry_delay=self.config.retry_delay,
+            api_timeout=self.config.api_timeout,
+            use_cache=self.config.enable_caching,
+            cache=self.cache
+        )
 
     def _log_completion_metrics(self, output_path: str, total_time: float):
         """Log completion statistics."""
@@ -512,10 +464,9 @@ class AIAgent(BaseAgent):
             logger.info("Caching is disabled")
 
 
-def main():
+def main() -> int:
     """Main entry point for the AI agent."""
     # Detect if running as executable or script
-    import os
     script_name = os.path.basename(sys.argv[0])
     if script_name.endswith('.exe'):
         cmd = 'ai-doc-agent.exe'
@@ -593,8 +544,8 @@ Examples:
         output_file=args.output
     )
 
-    sys.exit(agent.run(max_iterations=args.iterations))
+    return agent.run(max_iterations=args.iterations)
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

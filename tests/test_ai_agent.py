@@ -11,6 +11,7 @@ from unittest.mock import patch, MagicMock
 
 from src.ai_agent import AIAgent, AgentConfig, ResponseCache
 from src.doc_generator import DocGeneratorError
+from src.base_agent import AnalysisError
 
 
 class TestAIAgent(unittest.TestCase):
@@ -96,7 +97,7 @@ class Calculator:
         )
 
         # Should not raise any exception
-        agent._validate_inputs()
+        agent.validate_inputs()
 
     def test_validate_inputs_invalid_directory(self):
         """Test input validation with invalid directory."""
@@ -109,8 +110,8 @@ class Calculator:
             output_file=None
         )
 
-        with self.assertRaises(DocGeneratorError):
-            agent._validate_inputs()
+        with self.assertRaises((DocGeneratorError, AnalysisError)):
+            agent.validate_inputs()
 
     def test_validate_inputs_invalid_max_files(self):
         """Test input validation with invalid max_files."""
@@ -123,8 +124,8 @@ class Calculator:
             output_file=None
         )
 
-        with self.assertRaises(DocGeneratorError):
-            agent._validate_inputs()
+        with self.assertRaises((DocGeneratorError, AnalysisError)):
+            agent.validate_inputs()
 
     @patch('src.ai_agent.detect_project_type')
     @patch('src.ai_agent.find_code_files')
@@ -207,7 +208,7 @@ class Calculator:
         )
 
         critique = "The documentation is excellent and requires no changes."
-        self.assertTrue(agent._is_critique_positive(critique))
+        self.assertTrue(agent.is_critique_positive(critique))
 
     def test_is_critique_positive_explicit_phrases(self):
         """Test critique positivity detection for various explicit positive phrases."""
@@ -230,7 +231,7 @@ class Calculator:
 
         for critique in positive_critiques:
             with self.subTest(critique=critique):
-                self.assertTrue(agent._is_critique_positive(critique))
+                self.assertTrue(agent.is_critique_positive(critique))
 
     def test_is_critique_positive_scoring(self):
         """Test critique positivity detection using scoring system."""
@@ -245,7 +246,7 @@ class Calculator:
 
         # High positive score with many positive words
         critique = "The documentation is excellent, clear, comprehensive, well-written, and professional."
-        self.assertTrue(agent._is_critique_positive(critique))
+        self.assertTrue(agent.is_critique_positive(critique))
 
         # Mixed but still positive (good outweighs the improvement suggestion)
         critique = "The documentation is good and clear but should add more examples."
@@ -272,7 +273,7 @@ class Calculator:
 
         for critique in negative_critiques:
             with self.subTest(critique=critique):
-                self.assertFalse(agent._is_critique_positive(critique))
+                self.assertFalse(agent.is_critique_positive(critique))
 
     def test_cache_functionality(self):
         """Test response caching functionality."""
@@ -297,6 +298,33 @@ class Calculator:
             cache.clear()
             result = cache.get("test prompt", "test-model")
             self.assertIsNone(result)
+
+    @patch('src.ai_agent.call_ollama_api')
+    def test_call_ollama_with_retry_success(self, mock_call_api):
+        """Test successful API call through the agent."""
+        mock_call_api.return_value = "API response"
+        
+        agent = AIAgent(
+            directory=self.temp_dir,
+            max_files=10,
+            model="test-model",
+            project_type="backend",
+            output_format="markdown",
+            output_file=None
+        )
+        
+        result = agent._call_ollama_with_retry("test prompt")
+        
+        self.assertEqual(result, "API response")
+        mock_call_api.assert_called_once_with(
+            prompt="test prompt",
+            model="test-model",
+            max_retries=agent.config.max_retries,
+            retry_delay=agent.config.retry_delay,
+            api_timeout=agent.config.api_timeout,
+            use_cache=agent.config.enable_caching,
+            cache=agent.cache
+        )
 
     def test_agent_with_caching_enabled(self):
         """Test agent initialization with caching enabled."""
@@ -334,47 +362,7 @@ class Calculator:
 
         self.assertIsNone(agent.cache)
 
-    def test_build_critique_prompt(self):
-        """Test critique prompt building."""
-        agent = AIAgent(
-            directory=self.temp_dir,
-            max_files=10,
-            model="test-model",
-            project_type="backend",
-            output_format="markdown",
-            output_file=None
-        )
 
-        documentation = "# Test Doc\nSome content here."
-        prompt = agent._build_critique_prompt(documentation)
-
-        self.assertIn("senior quality assurance engineer", prompt)
-        self.assertIn("# Test Doc", prompt)
-        self.assertIn("Test Doc", prompt)
-
-    def test_build_refinement_prompt(self):
-        """Test refinement prompt building."""
-        agent = AIAgent(
-            directory=self.temp_dir,
-            max_files=10,
-            model="test-model",
-            project_type="backend",
-            output_format="markdown",
-            output_file=None
-        )
-
-        # Mock file contents
-        agent.file_contents = [{'path': 'test.py', 'content': 'print("hello")'}]
-
-        documentation = "# Test Doc\nSome content."
-        critique = "Needs improvement in section X."
-
-        prompt = agent._build_refinement_prompt(documentation, critique)
-
-        self.assertIn("senior technical writer", prompt)
-        self.assertIn("# Test Doc", prompt)
-        self.assertIn("Needs improvement in section X", prompt)
-        self.assertIn("File: test.py", prompt)
 
 
 if __name__ == '__main__':

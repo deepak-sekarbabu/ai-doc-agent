@@ -7,69 +7,24 @@ Supports multiple output formats (Markdown, HTML, PDF) and intelligent file prio
 """
 
 import os
-import sys
-import logging
-from pathlib import Path
-from typing import List, Dict, Optional
-from datetime import datetime
 import re
+import logging
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
-import requests
-from dotenv import load_dotenv
 import markdown
 import pdfkit
+from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
 
-from .base_agent import DocumentationTemplates
+from .base_agent import DocumentationTemplates  # noqa: E402
+from .utils.file_utils import find_code_files, read_file_safe, detect_project_type, MAX_CONTENT_PREVIEW  # noqa: E402
+from .utils.text_utils import extract_docstrings, extract_jsdoc, clean_markdown_response  # noqa: E402
+from .utils.api_utils import call_ollama_api, get_ollama_headers, OLLAMA_API_URL, MODEL_NAME, API_TIMEOUT  # noqa: E402
 
 load_dotenv()
-
-# Configure Ollama API URL based on mode
-OLLAMA_MODE = os.getenv("OLLAMA_MODE", "cloud").lower()
-if OLLAMA_MODE == "local":
-    OLLAMA_API_URL = os.getenv("OLLAMA_API_URL", "http://localhost:11434/api/generate")
-else:
-    OLLAMA_API_URL = os.getenv("OLLAMA_API_URL", "https://ollama.com/api/generate")
-
-MODEL_NAME = os.getenv("MODEL_NAME", "gpt-oss:120b-cloud")
-API_TIMEOUT = int(os.getenv("API_TIMEOUT", "300"))
-
-SUPPORTED_EXTENSIONS = frozenset([
-    ".py", ".js", ".ts", ".tsx", ".jsx", ".java", ".cs", ".go", ".php", 
-    ".rb", ".rs", ".c", ".cpp", ".h", ".hpp", ".html", ".css", ".scss", 
-    ".sql", ".sh", ".kt", ".swift", ".vue", ".svelte", ".xml", ".gradle"
-])
-
-IGNORED_DIRECTORIES = frozenset([
-    "node_modules", ".git", ".vscode", ".idea", "__pycache__", "dist", 
-    "build", "target", "out", "bin", "obj", "vendor", "tmp", "temp", 
-    ".next", "docs", "coverage", ".pytest_cache"
-])
-
-FRONTEND_EXTENSIONS = frozenset([
-    ".js", ".ts", ".tsx", ".jsx", ".vue", ".svelte", ".html", ".css", ".scss"
-])
-
-BACKEND_EXTENSIONS = frozenset([
-    ".py", ".java", ".cs", ".go", ".php", ".rb", ".rs", ".c", ".cpp", ".h", ".hpp", ".kt", ".swift", ".sql"
-])
-
-PRIORITY_FILES = {
-    "frontend": frozenset([
-        "package.json", "README.md", "index.html", "App.tsx", "App.jsx",
-        "main.tsx", "main.jsx", "vite.config.ts", "tailwind.config.ts",
-        "tsconfig.json", "webpack.config.js", "next.config.js", "nuxt.config.js"
-    ]),
-    "backend": frozenset([
-        "pom.xml", "build.gradle", "settings.gradle", "application.properties", 
-        "application.yml", "setup.py", "requirements.txt", "go.mod", "Cargo.toml",
-        "composer.json", "Program.cs", "Startup.cs", "README.md", "Gemfile"
-    ])
-}
-
-MAX_CONTENT_PREVIEW = 2000
-
 
 class DocGeneratorError(Exception):
     """Base exception for documentation generator errors."""
@@ -81,172 +36,41 @@ class OllamaConnectionError(DocGeneratorError):
     pass
 
 
-def detect_project_type(start_path: str) -> str:
-    """
-    Auto-detect project type based on configuration files.
-    
-    Args:
-        start_path: Root directory to analyze
-        
-    Returns:
-        Project type: 'frontend', 'backend', or 'mixed'
-    """
-    indicators = {
-        "frontend": ["package.json", "yarn.lock", "pnpm-lock.yaml"],
-        "backend": ["pom.xml", "build.gradle", "go.mod", "Cargo.toml", "requirements.txt", "Gemfile"]
-    }
-    
-    found_types = set()
-    
-    for root, dirs, files in os.walk(start_path):
-        dirs[:] = [d for d in dirs if d not in IGNORED_DIRECTORIES]
-        
-        for file in files:
-            if file in indicators["frontend"]:
-                found_types.add("frontend")
-            if file in indicators["backend"]:
-                found_types.add("backend")
-        
-        if len(found_types) == 2:
-            return "mixed"
-    
-    if "frontend" in found_types:
-        return "frontend"
-    elif "backend" in found_types:
-        return "backend"
-    
-    return "mixed"
-
-
-def find_code_files(start_path: str, max_files: int = 50, project_type: Optional[str] = None) -> List[str]:
-    """
-    Find supported code files in a directory with intelligent prioritization.
-    
-    Args:
-        start_path: Root directory to search
-        max_files: Maximum number of files to return
-        project_type: Project type ('frontend', 'backend', 'mixed', or None for auto-detect)
-        
-    Returns:
-        List of file paths, with priority files first
-    """
-    if not os.path.isdir(start_path):
-        raise ValueError(f"Invalid directory: {start_path}")
-    
-    if project_type is None:
-        project_type = detect_project_type(start_path)
-    
-    priority_files_list = PRIORITY_FILES.get(project_type, PRIORITY_FILES["frontend"] | PRIORITY_FILES["backend"])
-    
-    allowed_extensions = SUPPORTED_EXTENSIONS
-    if project_type == "frontend":
-        allowed_extensions = FRONTEND_EXTENSIONS
-    elif project_type == "backend":
-        allowed_extensions = BACKEND_EXTENSIONS
-    
-    priority_files = []
-    code_files = []
-    
-    for root, dirs, files in os.walk(start_path):
-        dirs[:] = [d for d in dirs if d not in IGNORED_DIRECTORIES]
-        
-        for file in files:
-            if not any(file.endswith(ext) for ext in allowed_extensions):
-                continue
-                
-            file_path = os.path.join(root, file)
-            if os.path.basename(file) in priority_files_list:
-                priority_files.append(file_path)
-            else:
-                code_files.append(file_path)
-    
-    all_files = priority_files + code_files
-    return all_files[:max_files]
-
-
-def read_file_safe(file_path: str) -> Optional[str]:
-    """
-    Safely read file content with error handling.
-    
-    Args:
-        file_path: Path to file to read
-        
-    Returns:
-        File content or None if reading fails
-    """
-    try:
-        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
-            return f.read()
-    except (IOError, OSError) as e:
-        logger.warning(f"Could not read {file_path}: {e}")
-        return None
-
-
-def extract_docstrings(content: str) -> Dict[str, str]:
-    """Extract Python docstrings from code."""
-    docstrings = {}
-    pattern = r'(def|class)\s+([^\s\(]+).*?:\s*\n\s*"""(.*?)"""'
-    
-    for match in re.finditer(pattern, content, re.DOTALL):
-        entity_type, entity_name, docstring = match.groups()
-        docstrings[f"{entity_type} {entity_name}"] = docstring.strip()
-    
-    return docstrings
-
-
-def extract_jsdoc(content: str) -> Dict[str, str]:
-    """Extract JSDoc comments from JavaScript/TypeScript code."""
-    jsdocs = {}
-    pattern = r'/\*\*(.*?)\*/\s*(?:export\s+)?(?:function|class|const|let|var)\s+([^\s\(=]+)'
-    
-    for match in re.finditer(pattern, content, re.DOTALL):
-        doc_comment, entity_name = match.groups()
-        doc_lines = [line.strip().lstrip('*').strip() for line in doc_comment.split('\n')]
-        cleaned_doc = '\n'.join(line for line in doc_lines if line)
-        jsdocs[entity_name] = cleaned_doc
-    
-    return jsdocs
-
-
-def get_ollama_headers() -> Dict[str, str]:
-    """Build request headers with optional API key authentication."""
-    headers = {"Content-Type": "application/json"}
-    api_key = os.getenv("OLLAMA_API_KEY")
-    
-    if api_key:
-        headers["Authorization"] = f"Bearer {api_key}"
-    
-    return headers
-
-
-def check_ollama_connection() -> bool:
-    """Verify Ollama API is accessible."""
-    try:
-        # For cloud mode, check the base domain; for local, check the API endpoint
-        if OLLAMA_MODE == "local":
-            # Check if local Ollama is running by trying to access the API endpoint
-            response = requests.get(
-                "http://localhost:11434/api/tags",
-                headers=get_ollama_headers(),
-                timeout=5
-            )
-        else:
-            # For cloud mode, check the base domain
-            response = requests.get(
-                "https://ollama.com/",
-                headers=get_ollama_headers(),
-                timeout=5
-            )
-        return response.status_code == 200
-    except requests.RequestException:
-        return False
-
-
 def build_prompt(file_summaries: str, docstring_info: str, output_format: str, project_type: str = "mixed") -> str:
     """Build the documentation generation prompt."""
     return DocumentationTemplates.build_generation_prompt(
         file_summaries, docstring_info, output_format, project_type
     )
+
+
+def _prepare_file_summaries(file_contents: List[Dict[str, str]]) -> Tuple[List[str], List[str]]:
+    """Prepare file summaries and docstring info from file contents."""
+    file_summaries: List[str] = []
+    docstring_info: List[str] = []
+    
+    for file_info in file_contents:
+        path = file_info['path']
+        content = file_info['content']
+        
+        content_preview = content[:MAX_CONTENT_PREVIEW]
+        if len(content) > MAX_CONTENT_PREVIEW:
+            content_preview += "..."
+        
+        file_summaries.append(f"--- File: {path} ---\n{content_preview}")
+        
+        if path.endswith('.py'):
+            docstrings = extract_docstrings(content)
+            if docstrings:
+                docstring_info.append(f"--- Docstrings from {path} ---")
+                docstring_info.extend(f"{k}: {v}" for k, v in docstrings.items())
+        
+        elif path.endswith(('.js', '.ts', '.tsx', '.jsx')):
+            jsdocs = extract_jsdoc(content)
+            if jsdocs:
+                docstring_info.append(f"--- JSDoc from {path} ---")
+                docstring_info.extend(f"{k}: {v}" for k, v in jsdocs.items())
+    
+    return file_summaries, docstring_info
 
 
 def generate_documentation(
@@ -273,30 +97,7 @@ def generate_documentation(
     if not file_contents:
         raise DocGeneratorError("No code files to document")
     
-    file_summaries = []
-    docstring_info = []
-    
-    for file_info in file_contents:
-        path = file_info['path']
-        content = file_info['content']
-        
-        content_preview = content[:MAX_CONTENT_PREVIEW]
-        if len(content) > MAX_CONTENT_PREVIEW:
-            content_preview += "..."
-        
-        file_summaries.append(f"--- File: {path} ---\n{content_preview}")
-        
-        if path.endswith('.py'):
-            docstrings = extract_docstrings(content)
-            if docstrings:
-                docstring_info.append(f"--- Docstrings from {path} ---")
-                docstring_info.extend(f"{k}: {v}" for k, v in docstrings.items())
-        
-        elif path.endswith(('.js', '.ts', '.tsx', '.jsx')):
-            jsdocs = extract_jsdoc(content)
-            if jsdocs:
-                docstring_info.append(f"--- JSDoc from {path} ---")
-                docstring_info.extend(f"{k}: {v}" for k, v in jsdocs.items())
+    file_summaries, docstring_info = _prepare_file_summaries(file_contents)
     
     prompt = build_prompt(
         "\n".join(file_summaries),
@@ -308,41 +109,25 @@ def generate_documentation(
     logger.info(f"Sending request to Ollama API (model: {model})")
     logger.debug(f"Prompt: {len(prompt)} chars (~{len(prompt) // 4} tokens)")
     
-    try:
-        response = requests.post(
-            OLLAMA_API_URL,
-            json={
-                "model": model,
-                "prompt": prompt,
-                "stream": False,
-                "options": {
-                    "temperature": 0.7,
-                    "top_p": 0.9
-                }
-            },
-            headers=get_ollama_headers(),
-            timeout=API_TIMEOUT
-        )
-        response.raise_for_status()
-        
-        resp_data = response.json()
-        doc = resp_data.get("response") or resp_data.get("text")
-        
-        if not doc:
-            raise DocGeneratorError("Invalid API response format")
-        
-        doc = re.sub(r"```.*?```", "", doc, flags=re.DOTALL)
-        doc = re.sub(r"<think>.*?</think>", "", doc, flags=re.DOTALL)
-        
-        logger.info("Documentation generated successfully")
-        return doc
-        
-    except requests.Timeout:
-        raise DocGeneratorError(f"API request timeout after {API_TIMEOUT}s")
-    except requests.HTTPError as e:
-        raise DocGeneratorError(f"API request failed: {e}")
-    except requests.RequestException as e:
-        raise DocGeneratorError(f"Network error: {e}")
+    # Use the utility function for API calls with caching
+    from .utils.api_utils import ResponseCache, call_ollama_api
+    from .utils.text_utils import clean_markdown_response
+    cache = ResponseCache()  # Use default settings or load from config
+    doc = call_ollama_api(
+        prompt=prompt,
+        model=model,
+        max_retries=3,
+        retry_delay=2,
+        api_timeout=API_TIMEOUT,
+        use_cache=True,
+        cache=cache
+    )
+    
+    # Clean the response
+    doc = clean_markdown_response(doc)
+    
+    logger.info("Documentation generated successfully")
+    return doc
 
 
 def convert_markdown_to_html(markdown: str) -> str:
@@ -447,30 +232,39 @@ def save_documentation(content: str, output_format: str, output_file: Optional[s
     # Create output directory if it doesn't exist
     if output_dir is None:
         output_dir = Path("output")
-    output_dir.mkdir(exist_ok=True, parents=True)
+    
+    try:
+        output_dir.mkdir(exist_ok=True, parents=True)
+    except OSError as e:
+        logger.error(f"Failed to create output directory {output_dir}: {e}")
+        raise DocGeneratorError(f"Cannot create output directory: {e}")
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     base_name = output_file.rsplit('.', 1)[0] if output_file else f"documentation_{timestamp}"
 
-    if output_format.lower() == "html":
-        filename = output_dir / f"{base_name}.html"
-        final_content = convert_markdown_to_html(content)
-        with open(filename, "w", encoding="utf-8") as f:
-            f.write(final_content)
-    elif output_format.lower() == "pdf":
-        filename = output_dir / f"{base_name}.pdf"
-        try:
-            convert_to_pdf(content, str(filename))
-            logger.info("PDF generated successfully")
-        except Exception as e:
-            logger.warning(f"PDF generation failed: {e}. Falling back to Markdown format...")
+    try:
+        if output_format.lower() == "html":
+            filename = output_dir / f"{base_name}.html"
+            final_content = convert_markdown_to_html(content)
+            with open(filename, "w", encoding="utf-8") as f:
+                f.write(final_content)
+        elif output_format.lower() == "pdf":
+            filename = output_dir / f"{base_name}.pdf"
+            try:
+                convert_to_pdf(content, str(filename))
+                logger.info("PDF generated successfully")
+            except Exception as e:
+                logger.warning(f"PDF generation failed: {e}. Falling back to Markdown format...")
+                filename = output_dir / f"{base_name}.md"
+                with open(filename, "w", encoding="utf-8") as f:
+                    f.write(content)
+                logger.info("Note: Install wkhtmltopdf for PDF support: https://wkhtmltopdf.org/downloads.html")
+        else:
             filename = output_dir / f"{base_name}.md"
             with open(filename, "w", encoding="utf-8") as f:
                 f.write(content)
-            logger.info("Note: Install wkhtmltopdf for PDF support: https://wkhtmltopdf.org/downloads.html")
-    else:
-        filename = output_dir / f"{base_name}.md"
-        with open(filename, "w", encoding="utf-8") as f:
-            f.write(content)
+    except OSError as e:
+        logger.error(f"Failed to write documentation to {filename}: {e}")
+        raise DocGeneratorError(f"Cannot write documentation file: {e}")
 
     return str(filename)
