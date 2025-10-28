@@ -12,6 +12,7 @@ import argparse
 import logging
 from pathlib import Path
 from typing import List, Dict, Optional, TypedDict
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from langgraph.graph import StateGraph, END
 from dotenv import load_dotenv
@@ -24,10 +25,8 @@ from .doc_generator import (
     detect_project_type,
     DocGeneratorError,
 )
-from .ai_agent import (
-    AIAgent,
-    AgentConfig
-)
+from .ai_agent import AIAgent
+from .base_agent import AgentConfig
 
 load_dotenv()
 
@@ -60,53 +59,36 @@ class AgentState(TypedDict):
     iteration: int
     max_iterations: int
     config: AgentConfig
+    agent: Optional[AIAgent]
 
 
 # --- Node Implementations ---
 def analyze_codebase(state: AgentState) -> AgentState:
     """
     Analyzes the codebase to find and read relevant files.
-    This node populates the 'file_contents' in the state.
+    This node populates the 'file_contents' in the state and initializes the agent.
     """
     logger.info(f"Analyzing directory: {state['directory']}")
-    
-    project_type = state.get('project_type')
-    if project_type is None:
-        project_type = detect_project_type(str(state['directory']))
-        logger.info(f"Auto-detected project type: {project_type}")
-    
-    code_files = find_code_files(
-        str(state['directory']),
-        state['max_files'],
-        project_type
+
+    # Create agent and let it handle the analysis
+    agent = AIAgent(
+        directory=str(state['directory']),
+        max_files=state['max_files'],
+        model=state['model'],
+        project_type=state.get('project_type'),
+        output_format=state['output_format'],
+        output_file=state['output_file'],
+        config=state['config']
     )
-    
-    if not code_files:
-        raise DocGeneratorError("No supported code files found.")
 
-    logger.info(f"Found {len(code_files)} files to analyze")
-    
-    file_contents = []
-    for file_path in code_files:
-        rel_path = os.path.relpath(file_path, state['directory'])
-        logger.debug(f"Reading: {rel_path}")
-        content = read_file_safe(file_path)
-        
-        if content:
-            file_contents.append({
-                "path": rel_path,
-                "content": content
-            })
+    # Analyze the codebase using the agent's method
+    agent.analyze_codebase()
 
-    if not file_contents:
-        raise DocGeneratorError("No files could be read successfully.")
-    
-    logger.info(f"Successfully read {len(file_contents)} files")
-    
     return {
         **state,
-        "file_contents": file_contents,
-        "project_type": project_type,
+        "file_contents": agent.file_contents,
+        "project_type": agent.project_type,
+        "agent": agent,
     }
 
 def generate_draft(state: AgentState) -> AgentState:
@@ -114,20 +96,10 @@ def generate_draft(state: AgentState) -> AgentState:
     Generates the initial documentation draft.
     """
     logger.info("Generating initial documentation draft...")
-    
-    agent = AIAgent(
-        directory=state['directory'],
-        max_files=state['max_files'],
-        model=state['model'],
-        project_type=state['project_type'],
-        output_format=state['output_format'],
-        output_file=state['output_file'],
-        config=state['config']
-    )
-    agent.file_contents = state['file_contents']
-    
+
+    agent = state['agent']
     documentation = agent.generate_documentation_draft()
-    
+
     return {**state, "documentation": documentation}
 
 def critique_document(state: AgentState) -> AgentState:
@@ -135,19 +107,10 @@ def critique_document(state: AgentState) -> AgentState:
     Critiques the current documentation draft.
     """
     logger.info("Critiquing documentation...")
-    
-    agent = AIAgent(
-        directory=state['directory'],
-        max_files=state['max_files'],
-        model=state['model'],
-        project_type=state['project_type'],
-        output_format=state['output_format'],
-        output_file=state['output_file'],
-        config=state['config']
-    )
-    
+
+    agent = state['agent']
     critique = agent.critique_documentation(state['documentation'])
-    
+
     return {**state, "critique": critique}
 
 def refine_document(state: AgentState) -> AgentState:
@@ -155,20 +118,10 @@ def refine_document(state: AgentState) -> AgentState:
     Refines the documentation based on the critique.
     """
     logger.info("Refining documentation...")
-    
-    agent = AIAgent(
-        directory=state['directory'],
-        max_files=state['max_files'],
-        model=state['model'],
-        project_type=state['project_type'],
-        output_format=state['output_format'],
-        output_file=state['output_file'],
-        config=state['config']
-    )
-    agent.file_contents = state['file_contents']
 
+    agent = state['agent']
     refined_documentation = agent.refine_documentation(state['documentation'], state['critique'])
-    
+
     return {**state, "documentation": refined_documentation, "iteration": state["iteration"] + 1}
 
 
@@ -178,22 +131,14 @@ def should_continue(state: AgentState) -> str:
     Determines whether to continue refining or to finish.
     """
     logger.info(f"Iteration {state['iteration']} / {state['max_iterations']}")
-    
+
     if state['iteration'] >= state['max_iterations']:
         logger.info("Max iterations reached. Finishing.")
         return "finish"
-    
-    agent = AIAgent(
-        directory=state['directory'],
-        max_files=state['max_files'],
-        model=state['model'],
-        project_type=state['project_type'],
-        output_format=state['output_format'],
-        output_file=state['output_file'],
-        config=state['config']
-    )
-    
-    if agent._is_critique_positive(state['critique']):
+
+    agent = state['agent']
+
+    if agent.is_critique_positive(state['critique']):
         logger.info("Critique is positive. Finishing.")
         return "finish"
     else:
@@ -268,7 +213,8 @@ def main():
         critique=None,
         iteration=0,
         max_iterations=args.iterations,
-        config=AgentConfig()
+        config=AgentConfig(),
+        agent=None
     )
     
     # Build and run the graph
@@ -276,13 +222,10 @@ def main():
     final_state = app.invoke(initial_state)
     
     # Save the final documentation
-    if final_state.get("documentation"):
-        output_path = save_documentation(
-            final_state["documentation"],
-            final_state["output_format"],
-            final_state["output_file"],
-            output_dir=final_state["directory"] / "output"
-        )
+    if final_state.get("documentation") and final_state.get("agent"):
+        agent = final_state["agent"]
+        agent.documentation = final_state["documentation"]
+        output_path = agent.save_documentation()
         logger.info(f"Documentation saved to: {output_path}")
     else:
         logger.error("Failed to generate documentation.")

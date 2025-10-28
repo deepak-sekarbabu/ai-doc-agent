@@ -18,6 +18,8 @@ from dotenv import load_dotenv
 import markdown
 import pdfkit
 
+from .base_agent import DocumentationTemplates
+
 load_dotenv()
 
 # Configure Ollama API URL based on mode
@@ -239,107 +241,9 @@ def check_ollama_connection() -> bool:
 
 def build_prompt(file_summaries: str, docstring_info: str, output_format: str, project_type: str = "mixed") -> str:
     """Build the documentation generation prompt."""
-    format_instructions = {
-        "html": "Generate documentation in HTML format with proper HTML5 structure.",
-        "pdf": "Generate documentation in Markdown format that will be converted to PDF.",
-        "markdown": "Generate documentation in well-structured Markdown format."
-    }
-    
-    project_descriptions = {
-        "frontend": """
-You are a senior technical documentation writer. Analyze the following frontend codebase 
-and generate comprehensive technical documentation.
-
-Project Overview:
-This is a frontend application. Analyze the frameworks, libraries, UI components, state management, 
-routing, and styling approaches used. Focus on component architecture, user interface patterns, 
-and client-side functionality.""",
-        "backend": """
-You are a senior technical documentation writer. Analyze the following backend codebase 
-and generate comprehensive technical documentation.
-
-Project Overview:
-This is a backend application. Analyze the API endpoints, data models, database interactions, 
-authentication/authorization, middleware, services, and business logic. Focus on server-side 
-architecture, API design patterns, and data flow.""",
-        "mixed": """
-You are a senior technical documentation writer. Analyze the following codebase 
-and generate comprehensive technical documentation.
-
-Project Overview:
-This is a full-stack application with both frontend and backend components. Analyze both 
-client-side and server-side architecture, their integration, and communication patterns."""
-    }
-    
-    project_intro = project_descriptions.get(project_type, project_descriptions["mixed"])
-    
-    return f"""
-{project_intro}
-
-{format_instructions.get(output_format.lower(), format_instructions["markdown"])}
-
-Structure your documentation with these exact sections:
-
-# Project Documentation
-
-## 1. Project Overview
-- High-level description of the project's purpose and functionality
-- Primary technologies and frameworks used
-- Target audience and use cases
-
-## 2. Architecture and Design
-- Overall architecture and component structure
-- Key design patterns and principles
-- Folder organization and code structure
-- State management approach
-- Performance optimization strategies
-
-## 3. Key Components and Modules
-For each major component/module:
-- Purpose and functionality
-- Key features and capabilities
-- Dependencies and relationships
-- Implementation details
-
-## 4. Development Setup
-- Prerequisites and system requirements
-- Installation instructions
-- Environment configuration
-- Available scripts and commands
-
-## 5. Deployment
-- Build process
-- Deployment options
-- Hosting considerations
-
-## 6. File Documentation
-For each significant file (prioritize important files):
-- File path and purpose
-- Key functions/classes/methods with parameters and return values
-- Usage examples where applicable
-
-## 7. Best Practices and Guidelines
-- Coding standards
-- Performance considerations
-- Accessibility features
-- Security considerations
-
-Here are the code files to analyze:
-
-{file_summaries}
-
-Here are extracted documentation comments:
-
-{docstring_info}
-
-IMPORTANT: 
-- Provide specific, actionable information
-- Use proper formatting with headers, lists, and code blocks
-- Focus on the most important files first (package.json, README.md, App.tsx, etc.)
-- Be concise but comprehensive
-- Do not include any backticks or code block markers in your response
-- Do not use phrases like "This is a placeholder" or "This is a sample"
-""".strip()
+    return DocumentationTemplates.build_generation_prompt(
+        file_summaries, docstring_info, output_format, project_type
+    )
 
 
 def generate_documentation(
