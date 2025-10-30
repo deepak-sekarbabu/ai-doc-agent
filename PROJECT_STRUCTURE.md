@@ -5,45 +5,43 @@ This document explains the organized structure of the AI Documentation Agent pro
 ## Directory Layout
 
 ```
-Docgenerator/
+ai-doc-agent/
 │
 ├── 📁 src/                          # Source Code
-│   ├── langgraph_agent.py           # Main AI agent using LangGraph (default)
+│   ├── langgraph_agent.py           # LangGraph-based AI agent (default)
 │   ├── ai_agent.py                  # Original AI agent with manual critique loop
 │   ├── base_agent.py                # Base agent class
 │   ├── doc_generator.py             # Core documentation generator
 │   ├── utils/                       # Utility functions
+│   │   ├── api_utils.py             # Ollama API integration
+│   │   ├── file_utils.py            # File discovery and processing
+│   │   ├── text_utils.py            # Text processing utilities
+│   │   ├── semantic_code_analyzer.py  # Code relationship analysis
+│   │   └── semantic_critique.py     # Documentation critique analysis
 │   └── __init__.py                  # Package initialization
 │
 ├── 📁 config/                       # Configuration Files
 │   ├── .env.example                 # Environment template
-│   ├── requirements.txt             # Python dependencies
-│   └── MANIFEST.in                  # Package manifest
+│   └── requirements.txt             # Python dependencies
 │
-├── 📁 docs/                         # Documentation
-│   ├── README.md                    # Complete user guide
-│   ├── README_DOC_GENERATOR.md      # Simple generator docs
-│   └── BUNDLING_GUIDE.md            # Distribution guide
+├── 📁 docs/                         # MkDocs Documentation
+│   └── (MkDocs site files)
 │
 ├── 📁 build/                        # Build & Deployment
-│   ├── build.bat                    # Windows build script
-│   ├── build.sh                     # Linux/Mac build script
-│   ├── ai_agent.spec                # PyInstaller configuration
 │   ├── Dockerfile                   # Docker image definition
-│   └── docker-compose.yml           # Docker compose config
+│   └── docker-compose.yml           # Docker orchestration
 │
-├── 📁 tests/                        # Unit Tests (future)
-│   └── README.md                    # Testing documentation
+├── 📁 tests/                        # Unit Tests
+│   └── (Test files)
 │
 ├── 📁 examples/                     # Example Projects
-│   ├── sample_project.py            # Sample Python project
-│   └── README.md                    # Examples documentation
+│   └── (Sample projects for testing)
 │
 ├── 📁 output/                       # Generated Documentation
 │   └── (Generated .md, .html, .pdf files)
 │
 ├── 📄 setup.py                      # Package setup configuration
-├── 📄 run.py                        # Quick launcher script
+├── 📄 mkdocs.yml                    # Documentation site config
 ├── 📄 README.md                     # Project overview
 ├── 📄 .gitignore                    # Git ignore rules
 └── 📄 PROJECT_STRUCTURE.md          # This file
@@ -54,7 +52,7 @@ Docgenerator/
 ### Root Level
 
 - **setup.py** - Python package configuration for pip installation
-- **run.py** - Convenience script to run agent from project root
+- **mkdocs.yml** - MkDocs documentation site configuration
 - **README.md** - Quick start guide and project overview
 - **.gitignore** - Files and directories to exclude from git
 
@@ -62,11 +60,16 @@ Docgenerator/
 
 Contains the core application logic:
 
-- **langgraph_agent.py** - Main AI agent implementation using LangGraph (default). See [Agent Implementations Comparison](../docs/features/agent-implementations.md) for details.
-- **ai_agent.py** - Original AI agent implementation with a manual critique-refinement loop. See [Agent Implementations Comparison](../docs/features/agent-implementations.md) for details.
+- **langgraph_agent.py** - LangGraph-based AI agent (default) with semantic analysis integration
+- **ai_agent.py** - Original AI agent with manual critique-refinement loop and semantic analysis
 - **base_agent.py** - Base agent class with common functionality
 - **doc_generator.py** - Documentation generation utilities
-- **utils/** - Utility functions and helpers
+- **utils/** - Utility functions including semantic analysis:
+  - **api_utils.py** - Ollama API integration
+  - **file_utils.py** - File discovery and processing
+  - **text_utils.py** - Text processing utilities
+  - **semantic_code_analyzer.py** - Code relationship and architecture analysis
+  - **semantic_critique.py** - Documentation critique analysis
 - **__init__.py** - Package exports and version info
 
 ### config/ - Configuration
@@ -75,15 +78,10 @@ All configuration files in one place:
 
 - **.env.example** - Template for environment variables
 - **requirements.txt** - Python package dependencies
-- **MANIFEST.in** - Files to include in package distribution
 
 ### docs/ - Documentation
 
-User-facing documentation:
-
-- **README.md** - Complete feature and usage documentation
-- **README_DOC_GENERATOR.md** - Simple generator documentation
-- **BUNDLING_GUIDE.md** - How to create executables and packages
+MkDocs documentation site files and configuration.
 
 ### build/ - Build Scripts
 
@@ -144,25 +142,24 @@ Default location for generated documentation (gitignored)
 ### Running the Agent
 
 ```bash
-# From project root
-python run.py --directory ./my-project
+# Direct execution
+python -m src.ai_agent --directory ./my-project
 
 # After pip install
 ai-doc-agent --directory ./my-project
+
+# Using LangGraph agent
+python -m src.langgraph_agent --directory ./my-project
 ```
 
 ### Building
 
 ```bash
-# Executable
-cd build && build.bat  # Windows
-cd build && ./build.sh  # Linux/Mac
+# Docker
+cd build && docker-compose build
 
 # Package
 python -m build
-
-# Docker
-cd build && docker-compose build
 ```
 
 ### Adding New Features
@@ -178,9 +175,24 @@ cd build && docker-compose build
 2. Edit `.env` with your settings
 3. Dependencies in `config/requirements.txt`
 
-## Migration from Old Structure
+## Key Features of Version 2.0.0
 
-Files were moved as follows:
+- **Semantic Code Analysis**: Advanced code relationship and architecture analysis
+- **LangGraph Integration**: State-of-the-art agent orchestration with semantic insights
+- **Enhanced Documentation**: Semantic analysis results integrated into documentation generation
+- **Comprehensive Testing**: Full test coverage with CI/CD integration
+- **Docker Support**: Complete containerization for isolated runs
+- **Multi-Format Output**: Markdown, HTML, and PDF generation
+- **Extensible Architecture**: Plugin system for new languages and output formats
+
+## Project Evolution
+
+The project has evolved from a simple AI agent to a comprehensive documentation generation system with:
+
+1. **Version 1.0**: Basic AI agent with iterative refinement
+2. **Version 2.0**: Added semantic code analysis, LangGraph integration, and enhanced architecture
+
+The current structure supports both the original AIAgent implementation and the LangGraph-based agent, providing flexibility for different use cases while maintaining backward compatibility.
 
 ```
 OLD LOCATION              →  NEW LOCATION
@@ -200,4 +212,4 @@ Dockerfile                →  build/Dockerfile
 docker-compose.yml        →  build/docker-compose.yml
 ```
 
-All scripts and configurations updated to reflect new paths.
+
