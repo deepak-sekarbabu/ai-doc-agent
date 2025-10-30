@@ -1,72 +1,70 @@
-# AI Doc Agent Project (`ai-doc-agent`)
+# AI Doc Agent Project (`ai-doc-agent`) - Version 2.0.0
 
 This document provides a comprehensive overview of the `ai-doc-agent` project, designed to be used as a context for AI-driven development.
 
 ## Project Overview
 
-The `ai-doc-agent` is a sophisticated Python-based tool that automates the generation of technical documentation for code projects. It leverages Large Language Models (LLMs) through Ollama to analyze a codebase, generate initial documentation, and then iteratively critique and refine its own output to improve quality. This iterative process is implemented as a stateful graph using LangGraph.
+The `ai-doc-agent` v2.0.0 is a sophisticated Python-based tool that automates the generation of technical documentation for code projects with advanced semantic code analysis. It leverages Large Language Models (LLMs) through Ollama to analyze a codebase, perform semantic relationship analysis, generate initial documentation, and then iteratively critique and refine its own output to improve quality. This iterative process is implemented as a stateful graph using LangGraph with semantic analysis capabilities.
 
 **Key Technologies:**
 
-*   **Backend:** Python
+*   **Backend:** Python 3.8+
 *   **AI/LLM:** Ollama (local or cloud), LangChain, LangGraph
-*   **Dependencies:** `requests` (for API calls), `markdown`, `pdfkit` (for output formats).
-*   **Documentation:** `MkDocs` with the `Material` theme.
-*   **Testing:** `pytest`
+*   **Semantic Analysis:** Advanced code relationship and architecture analysis
+*   **Dependencies:** `requests` (for API calls), `markdown`, `pdfkit` (for output formats), `ast` (for code parsing)
+*   **Documentation:** `MkDocs` with the `Material` theme
+*   **Testing:** `pytest` with coverage reporting
 *   **Packaging:** `setuptools`, `PyInstaller` (for executables), `Docker`
+*   **Code Quality:** `black`, `flake8`, `mypy`
 
 ## Building and Running
 
 ### 1. Installation
 
-The project is a Python application. Install dependencies from `config/requirements.txt`:
+The project is a Python application. Install using the package installation method:
 
 ```bash
-pip install -r config/requirements.txt
-```
+git clone https://github.com/deepak-sekarbabu/ai-doc-agent.git
+cd ai-doc-agent
 
-For development, install the dev dependencies:
-
-```bash
+# Install with development dependencies (recommended)
 pip install -e .[dev]
 ```
+
+This installs the package in editable mode and registers the `ai-doc-agent` console script.
 
 ### 2. Configuration
 
 Configuration is managed through a `.env` file. Copy the example and edit it as needed:
 
 ```bash
-cp config/.env.example .env
+cp .env.example .env
 ```
 
-The `.env` file contains settings for Ollama (mode, model name), API timeouts, and agent behavior (caching, retries).
+The `.env` file contains settings for Ollama (mode, model name), API timeouts, agent behavior (caching, retries), and semantic analysis parameters.
 
 ### 3. Running the Agent
 
-The primary entry point is `run.py`, which executes the main AI agent from `src/langgraph_agent.py` (the LangGraph-based implementation). The project also provides an original implementation in `src/ai_agent.py`.
+The primary entry point is the `ai-doc-agent` console script, which executes the main AI agent from `src/langgraph_agent.py` (the LangGraph-based implementation with semantic analysis). The project also provides an original implementation in `src/ai_agent.py`.
 
 **To run the agent:**
 
 ```bash
 # Analyze the current directory
-python run.py
+ai-doc-agent
 
 # Analyze a specific directory
-python run.py --directory /path/to/your/project
-```
-
-The script can also be run as an installed package:
-
-```bash
-# After installing with 'pip install .'
 ai-doc-agent --directory /path/to/your/project
+
+# Generate documentation with semantic analysis
+ai-doc-agent --directory ./my-project --format html
 ```
 
 ## Development Conventions
 
 ### Testing
 
-The project uses `pytest` for unit testing. Tests are located in the `tests/` directory.
+The project uses `pytest` for comprehensive unit testing. Tests are located in the `tests/` directory and include semantic analysis testing.
 
 **To run the test suite:**
 
@@ -78,6 +76,12 @@ pytest
 
 ```bash
 pytest --cov=src --cov-report=html
+```
+
+**To run semantic analysis tests:**
+
+```bash
+pytest -k "semantic"
 ```
 
 ### Code Style and Quality
@@ -94,7 +98,7 @@ The CI pipeline on GitHub Actions automates testing across multiple Python versi
 
 ## Documentation
 
-The project's own documentation is built using `MkDocs` and is located in the `docs/` directory.
+The project's comprehensive documentation is built using `MkDocs` with the Material theme and is located in the `docs/` directory. The documentation includes semantic analysis guides, API references, and deployment instructions.
 
 **To serve the documentation locally:**
 
@@ -107,5 +111,7 @@ The project's own documentation is built using `MkDocs` and is located in the `d
     mkdocs serve
     ```
 3.  Open your browser to `http://localhost:8000`.
+
+**Online Documentation:** https://deepak-sekarbabu.github.io/ai-doc-agent/
 
 The documentation site configuration is in `mkdocs.yml`.
