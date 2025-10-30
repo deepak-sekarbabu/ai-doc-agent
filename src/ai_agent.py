@@ -46,6 +46,10 @@ try:
         create_semantic_critique_score,
         ValidationResult
     )
+    from .utils.semantic_code_analyzer import (
+        SemanticCodeAnalyzer,
+        SemanticCodeValidator
+    )
     from .base_agent import BaseAgent, AgentConfig, DocumentationTemplates
     from .utils.api_utils import ResponseCache
 except ImportError:
@@ -61,6 +65,10 @@ except ImportError:
         DocumentationValidator,
         create_semantic_critique_score,
         ValidationResult
+    )
+    from utils.semantic_code_analyzer import (
+        SemanticCodeAnalyzer,
+        SemanticCodeValidator
     )
     from base_agent import BaseAgent, AgentConfig, DocumentationTemplates
     from utils.api_utils import ResponseCache
@@ -114,6 +122,8 @@ class AIAgent(BaseAgent):
         # Initialize semantic critique analyzer and validator
         self.semantic_analyzer = SemanticCritiqueAnalyzer()
         self.documentation_validator = None  # Will be set after code analysis
+        self.semantic_code_analyzer = None   # Will be set after code analysis
+        self.semantic_code_validator = None  # Will be set after code analysis
         
         self.iteration_metrics: List[Dict[str, Union[int, float]]] = []
 
@@ -223,6 +233,10 @@ class AIAgent(BaseAgent):
 
         # Initialize documentation validator with analyzed files
         self.documentation_validator = DocumentationValidator(self.file_contents)
+        
+        # Initialize semantic code analyzer and validator
+        self.semantic_code_analyzer = SemanticCodeAnalyzer(self.file_contents)
+        self.semantic_code_validator = SemanticCodeValidator(self.file_contents)
 
         logger.info(f"Successfully read {len(self.file_contents)} files")
 
@@ -260,16 +274,25 @@ class AIAgent(BaseAgent):
         # Perform semantic analysis of the critique
         semantic_score = self.semantic_analyzer.analyze_critique_semantically(initial_critique)
         
-        # Cross-validate documentation against code
+        # Cross-validate documentation against code using both validators
         validation_issues = []
+        semantic_validation_issues = []
+        
         if self.documentation_validator:
             validation_issues = self.documentation_validator.validate_documentation(documentation)
+        
+        # Use semantic code validator for enhanced validation
+        if self.semantic_code_validator:
+            semantic_validation_issues = self.semantic_code_validator.validate_documentation_semantically(documentation)
+        
+        # Combine all validation issues
+        all_validation_issues = validation_issues + semantic_validation_issues
         
         # Generate enhanced critique with validation results
         enhanced_critique = self._enhance_critique_with_validation(
             initial_critique,
             semantic_score,
-            validation_issues
+            all_validation_issues
         )
         
         return enhanced_critique

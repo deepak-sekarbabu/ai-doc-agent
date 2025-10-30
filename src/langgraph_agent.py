@@ -18,6 +18,7 @@ from dotenv import load_dotenv
 from .doc_generator import save_documentation
 from .ai_agent import AIAgent
 from .base_agent import AgentConfig
+from .utils.semantic_code_analyzer import SemanticCodeAnalyzer
 
 load_dotenv()
 
@@ -51,6 +52,8 @@ class AgentState(TypedDict):
     max_iterations: int
     config: AgentConfig
     agent: Optional[AIAgent]
+    semantic_analyzer: Optional[SemanticCodeAnalyzer]
+    semantic_analysis: Optional[Dict[str, any]]
 
 
 # --- Node Implementations ---
@@ -82,14 +85,89 @@ def analyze_codebase(state: AgentState) -> AgentState:
         "agent": agent,
     }
 
+def perform_semantic_analysis(state: AgentState) -> AgentState:
+    """
+    Performs semantic code analysis to understand relationships and architecture.
+    """
+    logger.info("Performing semantic code analysis...")
+
+    # Initialize semantic analyzer with file contents
+    semantic_analyzer = SemanticCodeAnalyzer(state['file_contents'])
+
+    # Perform comprehensive analysis
+    coupling_analysis = semantic_analyzer.get_coupling_analysis()
+    central_elements = semantic_analyzer.get_central_elements(top_n=10)
+    architecture_patterns = semantic_analyzer.detect_architecture_patterns()
+
+    # Store analysis results
+    semantic_analysis = {
+        "coupling_analysis": coupling_analysis,
+        "central_elements": central_elements,
+        "architecture_patterns": architecture_patterns,
+        "code_elements_count": len(semantic_analyzer.code_elements),
+        "dependencies_count": len(semantic_analyzer.dependencies),
+    }
+
+    logger.info(f"Semantic analysis complete: {len(semantic_analyzer.code_elements)} elements, "
+               f"{len(semantic_analyzer.dependencies)} dependencies, "
+               f"{len(architecture_patterns)} patterns detected")
+
+    return {
+        **state,
+        "semantic_analyzer": semantic_analyzer,
+        "semantic_analysis": semantic_analysis,
+    }
+
 def generate_draft(state: AgentState) -> AgentState:
     """
-    Generates the initial documentation draft.
+    Generates the initial documentation draft enhanced with semantic analysis.
     """
     logger.info("Generating initial documentation draft...")
 
     agent = state['agent']
-    documentation = agent.generate_documentation_draft()
+
+    # Enhance agent with semantic analysis if available
+    if state.get('semantic_analysis'):
+        # Add semantic analysis to the agent's file contents for better context
+        semantic_info = state['semantic_analysis']
+
+        # Create enhanced file contents with semantic insights
+        enhanced_contents = state['file_contents'].copy()
+
+        # Add a semantic analysis summary file
+        semantic_summary = f"""# Semantic Code Analysis Summary
+
+## Architecture Overview
+- **Code Elements**: {semantic_info['code_elements_count']}
+- **Dependencies**: {semantic_info['dependencies_count']}
+- **Architecture Patterns**: {len(semantic_info['architecture_patterns'])}
+
+## Key Architectural Patterns
+"""
+        for pattern in semantic_info['architecture_patterns'][:5]:  # Top 5 patterns
+            semantic_summary += f"- **{pattern.pattern_type}**: {pattern.description} (confidence: {pattern.confidence:.2f})\n"
+
+        semantic_summary += "\n## Central Code Elements\n"
+        for element, score in semantic_info['central_elements'][:10]:
+            semantic_summary += f"- {element}: {score:.2f}\n"
+
+        # Add semantic summary as a virtual file
+        enhanced_contents.append({
+            'path': 'semantic_analysis_summary.md',
+            'content': semantic_summary
+        })
+
+        # Create a temporary agent with enhanced contents for better documentation
+        # We'll modify the agent's file_contents temporarily
+        original_contents = agent.file_contents
+        agent.file_contents = enhanced_contents
+
+        documentation = agent.generate_documentation_draft()
+
+        # Restore original contents
+        agent.file_contents = original_contents
+    else:
+        documentation = agent.generate_documentation_draft()
 
     return {**state, "documentation": documentation}
 
@@ -145,6 +223,7 @@ def build_graph() -> StateGraph:
 
     # Add nodes
     workflow.add_node("analyze_codebase", analyze_codebase)
+    workflow.add_node("semantic_analysis", perform_semantic_analysis)
     workflow.add_node("generate_draft", generate_draft)
     workflow.add_node("critique_document", critique_document)
     workflow.add_node("refine_document", refine_document)
@@ -153,7 +232,8 @@ def build_graph() -> StateGraph:
     workflow.set_entry_point("analyze_codebase")
 
     # Add edges
-    workflow.add_edge("analyze_codebase", "generate_draft")
+    workflow.add_edge("analyze_codebase", "semantic_analysis")
+    workflow.add_edge("semantic_analysis", "generate_draft")
     workflow.add_edge("generate_draft", "critique_document")
     
     workflow.add_conditional_edges(
@@ -205,7 +285,9 @@ def main():
         iteration=0,
         max_iterations=args.iterations,
         config=AgentConfig(),
-        agent=None
+        agent=None,
+        semantic_analyzer=None,
+        semantic_analysis=None
     )
     
     # Build and run the graph
