@@ -124,6 +124,7 @@ class AIAgent(BaseAgent):
         self.documentation_validator = None  # Will be set after code analysis
         self.semantic_code_analyzer = None   # Will be set after code analysis
         self.semantic_code_validator = None  # Will be set after code analysis
+        self.semantic_analysis = None  # Will store semantic analysis results
         
         self.iteration_metrics: List[Dict[str, Union[int, float]]] = []
 
@@ -233,26 +234,91 @@ class AIAgent(BaseAgent):
 
         # Initialize documentation validator with analyzed files
         self.documentation_validator = DocumentationValidator(self.file_contents)
-        
+
         # Initialize semantic code analyzer and validator
         self.semantic_code_analyzer = SemanticCodeAnalyzer(self.file_contents)
         self.semantic_code_validator = SemanticCodeValidator(self.file_contents)
 
+        # Perform semantic analysis
+        self._perform_semantic_analysis()
+
         logger.info(f"Successfully read {len(self.file_contents)} files")
+
+    def _perform_semantic_analysis(self) -> None:
+        """
+        Performs comprehensive semantic code analysis and stores results.
+        """
+        logger.info("Performing semantic code analysis...")
+
+        # Perform comprehensive analysis using the semantic code analyzer
+        coupling_analysis = self.semantic_code_analyzer.get_coupling_analysis()
+        central_elements = self.semantic_code_analyzer.get_central_elements(top_n=10)
+        architecture_patterns = self.semantic_code_analyzer.detect_architecture_patterns()
+
+        # Store analysis results
+        self.semantic_analysis = {
+            "coupling_analysis": coupling_analysis,
+            "central_elements": central_elements,
+            "architecture_patterns": architecture_patterns,
+            "code_elements_count": len(self.semantic_code_analyzer.code_elements),
+            "dependencies_count": len(self.semantic_code_analyzer.dependencies),
+        }
+
+        logger.info(f"Semantic analysis complete: {len(self.semantic_code_analyzer.code_elements)} elements, "
+                   f"{len(self.semantic_code_analyzer.dependencies)} dependencies, "
+                   f"{len(architecture_patterns)} patterns detected")
 
     def generate_documentation_draft(self) -> str:
         """
-        Generate the initial documentation draft.
+        Generate the initial documentation draft enhanced with semantic analysis.
 
         Returns:
             Generated documentation string
         """
-        return generate_documentation(
-            self.file_contents,
-            self.output_format,
-            self.model,
-            self.project_type
-        )
+        # Enhance file contents with semantic analysis if available
+        if self.semantic_analysis:
+            # Create enhanced file contents with semantic insights
+            enhanced_contents = self.file_contents.copy()
+
+            # Add a semantic analysis summary file
+            semantic_info = self.semantic_analysis
+            semantic_summary = f"""# Semantic Code Analysis Summary
+
+## Architecture Overview
+- **Code Elements**: {semantic_info['code_elements_count']}
+- **Dependencies**: {semantic_info['dependencies_count']}
+- **Architecture Patterns**: {len(semantic_info['architecture_patterns'])}
+
+## Key Architectural Patterns
+"""
+            for pattern in semantic_info['architecture_patterns'][:5]:  # Top 5 patterns
+                semantic_summary += f"- **{pattern.pattern_type}**: {pattern.description} (confidence: {pattern.confidence:.2f})\n"
+
+            semantic_summary += "\n## Central Code Elements\n"
+            for element, score in semantic_info['central_elements'][:10]:
+                semantic_summary += f"- {element}: {score:.2f}\n"
+
+            # Add semantic summary as a virtual file
+            enhanced_contents.append({
+                'path': 'semantic_analysis_summary.md',
+                'content': semantic_summary
+            })
+
+            # Generate documentation with enhanced contents
+            return generate_documentation(
+                enhanced_contents,
+                self.output_format,
+                self.model,
+                self.project_type
+            )
+        else:
+            # Fallback to original behavior if no semantic analysis
+            return generate_documentation(
+                self.file_contents,
+                self.output_format,
+                self.model,
+                self.project_type
+            )
 
     def critique_documentation(self, documentation: str) -> str:
         """
