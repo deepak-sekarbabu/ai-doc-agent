@@ -1,6 +1,6 @@
 # Command Reference
 
-Complete reference for all commands, options, and usage patterns.
+Complete reference for all commands, options, and usage patterns in AI Documentation Agent v2.0.0.
 
 ## Command Overview
 
@@ -8,18 +8,19 @@ The AI Documentation Agent provides three main entry points:
 
 | Command | Purpose | Mode |
 |---------|---------|------|
-| `python run.py` | Quick launcher | AI Agent (iterative) |
-| `python src/ai_agent.py` | Full AI agent | AI Agent (iterative) |
+| `ai-doc-agent` | Main console script | AI Agent (semantic + iterative) |
+| `python src/langgraph_agent.py` | LangGraph implementation | AI Agent (semantic + iterative) |
+| `python src/ai_agent.py` | Original implementation | AI Agent (semantic + iterative) |
 | `python src/doc_generator.py` | Simple generator | Single-pass |
 
-## run.py - Quick Launcher
+## ai-doc-agent - Main Console Script
 
-The simplest way to run the AI Agent.
+The primary way to run the AI Documentation Agent with semantic analysis.
 
 ### Syntax
 
 ```bash
-python run.py [OPTIONS]
+ai-doc-agent [OPTIONS]
 ```
 
 ### Options
@@ -27,12 +28,15 @@ python run.py [OPTIONS]
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `--directory DIR` | path | Current dir | Directory to analyze |
-| `--model MODEL` | string | From .env | Ollama model name |
 | `--format FORMAT` | choice | `markdown` | Output format |
 | `--output FILE` | string | Auto | Output filename (no ext) |
-| `--max-files N` | integer | 30 | Max files to analyze |
-| `--project-type TYPE` | choice | Auto | Project type |
+| `--max-files N` | integer | 100 | Max files to analyze |
 | `--iterations N` | integer | 3 | Max refinement iterations |
+| `--model MODEL` | string | From .env | Ollama model name |
+| `--project-type TYPE` | choice | Auto | Project type |
+| `--output-dir DIR` | path | Current dir | Output directory |
+| `--no-cache` | flag | False | Disable response caching |
+| `--log-level LEVEL` | choice | INFO | Logging level |
 | `--verbose` | flag | False | Enable verbose logging |
 
 ### Examples
@@ -41,103 +45,103 @@ python run.py [OPTIONS]
 
 ```bash
 # Analyze current directory
-python run.py
+ai-doc-agent
 
 # Analyze specific directory
-python run.py --directory ~/my-project
+ai-doc-agent --directory ~/my-project
 
 # Analyze with relative path
-python run.py --directory ./my-app
+ai-doc-agent --directory ./my-app
 ```
 
 #### Format Options
 
 ```bash
 # Markdown (default)
-python run.py
+ai-doc-agent
 
 # HTML output
-python run.py --format html
+ai-doc-agent --format html
 
 # PDF output (requires wkhtmltopdf)
-python run.py --format pdf
+ai-doc-agent --format pdf
 ```
 
 #### Quality Control
 
 ```bash
 # Quick docs (2 iterations)
-python run.py --iterations 2 --max-files 20
+ai-doc-agent --iterations 2 --max-files 20
 
 # Standard quality (default)
-python run.py --iterations 3 --max-files 30
+ai-doc-agent --iterations 3 --max-files 30
 
 # High quality (5 iterations)
-python run.py --iterations 5 --max-files 100
+ai-doc-agent --iterations 5 --max-files 100
 ```
 
 #### Model Selection
 
 ```bash
 # Use default model
-python run.py
+ai-doc-agent
 
 # Fast model
-python run.py --model llama2:7b
+ai-doc-agent --model llama2:7b
 
 # Code-optimized model
-python run.py --model codellama
+ai-doc-agent --model codellama
 
 # High-quality model
-python run.py --model llama2:13b
+ai-doc-agent --model llama2:13b
 ```
 
 #### Project Type
 
 ```bash
 # Auto-detect (default)
-python run.py
+ai-doc-agent
 
 # Frontend project
-python run.py --project-type frontend
+ai-doc-agent --project-type frontend
 
 # Backend project
-python run.py --project-type backend
+ai-doc-agent --project-type backend
 
 # Mixed project
-python run.py --project-type mixed
+ai-doc-agent --project-type mixed
 ```
 
 #### Custom Output
 
 ```bash
 # Auto-generated filename
-python run.py
+ai-doc-agent
 
 # Custom filename
-python run.py --output my_project_docs
+ai-doc-agent --output my_project_docs
 
 # Custom filename with format
-python run.py --output api_documentation --format html
+ai-doc-agent --output api_documentation --format html
 ```
 
 #### Debugging
 
 ```bash
 # Verbose mode
-python run.py --verbose
+ai-doc-agent --verbose
 
 # Verbose with all options
-python run.py \
+ai-doc-agent \
   --directory ./my-app \
   --verbose \
   --iterations 3 \
   --max-files 50
 ```
 
-## ai_agent.py - Full AI Agent
+## ai_agent.py - Original AI Agent Implementation
 
-Direct access to the AI Agent with all features.
+Direct access to the original AI Agent implementation with semantic analysis and iterative refinement.
 
 ### Syntax
 

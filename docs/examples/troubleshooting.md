@@ -38,10 +38,13 @@ setx PATH "%PATH%;C:\Python311;C:\Python311\Scripts"
 **Linux/macOS:**
 ```bash
 # Use python3
-python3 run.py --help
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .[dev]
+ai-doc-agent --help
 
 # Or create alias
-echo "alias python=python3" >> ~/.bashrc
+echo "alias ai-doc='ai-doc-agent'" >> ~/.bashrc
 source ~/.bashrc
 ```
 
@@ -184,7 +187,7 @@ API_TIMEOUT=900  # 15 minutes
 
 **2. Reduce file count:**
 ```bash
-python run.py --max-files 20
+ai-doc-agent --max-files 20
 ```
 
 **3. Use faster model:**
@@ -193,12 +196,12 @@ python run.py --max-files 20
 MODEL_NAME=llama2:7b  # Faster than llama2:13b
 
 # Or command line
-python run.py --model llama2:7b
+ai-doc-agent --model llama2:7b
 ```
 
 **4. Reduce iterations:**
 ```bash
-python run.py --iterations 2
+ai-doc-agent --max-iterations 2
 ```
 
 ---
@@ -218,10 +221,10 @@ INFO - Found 0 files to analyze
 **1. Check directory path:**
 ```bash
 # Use absolute path
-python run.py --directory /absolute/path/to/project
+ai-doc-agent --directory /absolute/path/to/project
 
 # Or relative from project root
-python run.py --directory ./my-project
+ai-doc-agent --directory ./my-project
 
 # Verify directory exists
 ls /path/to/project
@@ -253,7 +256,7 @@ IGNORED_DIRECTORIES = frozenset([
 
 **4. Use verbose mode:**
 ```bash
-python run.py --directory ./project --verbose
+ai-doc-agent --directory ./project --verbose
 # Will show file discovery process
 ```
 
@@ -279,7 +282,7 @@ ls -la /path/to/project
 chmod -R 755 /path/to/project
 
 # Or run with sudo (not recommended)
-sudo python run.py --directory /path/to/project
+sudo ai-doc-agent --directory /path/to/project
 ```
 
 **Windows:**
@@ -319,14 +322,14 @@ ls -la output/
 
 **2. Specify output name:**
 ```bash
-python run.py --output my_docs
+ai-doc-agent --output my_docs
 # Creates: output/my_docs.md
 ```
 
 **3. Check for errors:**
 ```bash
 # Run with verbose
-python run.py --verbose
+ai-doc-agent --verbose
 
 # Check logs
 cat ai_agent.log
@@ -374,7 +377,7 @@ wkhtmltopdf --version
 **3. Use alternative format:**
 ```bash
 # Use HTML instead
-python run.py --format html
+ai-doc-agent --format html
 
 # Convert HTML to PDF manually later
 wkhtmltopdf output/docs.html output/docs.pdf
@@ -396,12 +399,12 @@ wkhtmltopdf output/docs.html output/docs.pdf
 
 **1. Increase iterations:**
 ```bash
-python run.py --iterations 5  # Default is 3
+ai-doc-agent --max-iterations 5  # Default is 3
 ```
 
 **2. Use better model:**
 ```bash
-python run.py --model codellama  # Better for code
+ai-doc-agent --model codellama  # Better for code
 
 # Or in .env
 MODEL_NAME=codellama
@@ -409,12 +412,12 @@ MODEL_NAME=codellama
 
 **3. Analyze more files:**
 ```bash
-python run.py --max-files 100  # Default is 30
+ai-doc-agent --max-files 100  # Default is 30
 ```
 
 **4. Specify project type:**
 ```bash
-python run.py --project-type backend
+ai-doc-agent --project-type backend
 # More accurate than auto-detection
 ```
 
@@ -437,7 +440,7 @@ CRITIQUE_THRESHOLD=0.7  # Default is 0.8
 
 **1. More iterations:**
 ```bash
-python run.py --iterations 7
+ai-doc-agent --max-iterations 7
 ```
 
 **2. Increase timeout:**
@@ -449,7 +452,7 @@ API_TIMEOUT=900
 **3. Check critique logs:**
 ```bash
 # Run with verbose
-python run.py --verbose
+ai-doc-agent --verbose
 
 # Look for critique feedback
 grep "Critique:" ai_agent.log
@@ -458,10 +461,10 @@ grep "Critique:" ai_agent.log
 **4. Ensure important files are analyzed:**
 ```bash
 # Check if README is included
-python run.py --verbose | grep README
+ai-doc-agent --verbose | grep README
 
 # Increase file limit if needed
-python run.py --max-files 75
+ai-doc-agent --max-files 75
 ```
 
 ---
@@ -483,12 +486,12 @@ MODEL_NAME=llama2:7b  # Faster than llama2:13b
 
 **2. Reduce file count:**
 ```bash
-python run.py --max-files 20
+ai-doc-agent --max-files 20
 ```
 
 **3. Reduce iterations:**
 ```bash
-python run.py --iterations 2
+ai-doc-agent --max-iterations 2
 ```
 
 **4. Check system resources:**
@@ -628,7 +631,7 @@ docker run -v "$(pwd):/workspace" ...
 
 ```bash
 # Command line
-python run.py --verbose
+ai-doc-agent --verbose
 
 # Check logs
 tail -f ai_agent.log
@@ -688,7 +691,7 @@ ConnectionError: [Errno 111]
 
 **Command:**
 ```bash
-python run.py --directory ./my-project --verbose
+ai-doc-agent --directory ./my-project --verbose
 ```
 
 **Environment:**
@@ -775,10 +778,10 @@ ollama pull llama2:7b
 
 ```bash
 # Test with small project first
-python run.py --directory ./examples --max-files 5
+ai-doc-agent --directory ./examples --max-files 5
 
 # Then run on actual project
-python run.py --directory ./my-project
+ai-doc-agent --directory ./my-project
 ```
 
 ### 3. Use Version Control

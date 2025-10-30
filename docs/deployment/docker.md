@@ -1,6 +1,6 @@
 # Docker Deployment
 
-Deploy and run the AI Documentation Agent in a containerized environment for consistent, cross-platform execution.
+Deploy and run the AI Documentation Agent v2.0.0 in a containerized environment for consistent, cross-platform execution with semantic analysis.
 
 ## Overview
 
@@ -87,9 +87,9 @@ docker-compose run --rm ai-doc-agent
 
 # With custom options
 docker-compose run --rm ai-doc-agent \
-  --directory /workspace \
-  --format html \
-  --iterations 5
+--directory /workspace \
+--format html \
+--iterations 5
 ```
 
 ## Building the Image
@@ -113,11 +113,12 @@ docker build --no-cache -t ai-doc-agent .
 
 The Dockerfile performs these steps:
 
-1. **Base Image**: Uses Python 3.11 slim
+1. **Base Image**: Uses Python 3.12 slim
 2. **Install wkhtmltopdf**: For PDF generation support
-3. **Copy Dependencies**: Requirements.txt first (for caching)
-4. **Install Python Packages**: All required dependencies
-5. **Copy Application**: Source code files
+3. **Create non-root user**: For security
+4. **Copy Package Files**: Setup.py and source code
+5. **Install Package**: Editable installation with dependencies
+6. **Configure Entry Point**: Use ai-doc-agent console script
 6. **Setup Environment**: Configuration and output directories
 7. **Create Entrypoint**: Shell script for execution
 

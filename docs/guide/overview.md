@@ -1,10 +1,10 @@
 # User Guide Overview
 
-Welcome to the AI Documentation Agent! This guide will help you understand and use all the features of this intelligent documentation tool.
+Welcome to the AI Documentation Agent v2.0.0! This guide will help you understand and use all the features of this intelligent documentation tool with semantic analysis capabilities.
 
 ## What is AI Documentation Agent?
 
-An autonomous AI agent that generates, critiques, and iteratively refines technical documentation for your code projects. It analyzes your codebase, understands the structure, and creates comprehensive documentation automatically.
+An autonomous AI agent with semantic code analysis that generates, critiques, and iteratively refines technical documentation for your code projects. It performs deep code relationship analysis, understands architectural patterns, and creates comprehensive documentation automatically.
 
 ## Key Features
 
@@ -13,20 +13,21 @@ An autonomous AI agent that generates, critiques, and iteratively refines techni
 The agent doesn't just generate documentation once—it critiques its own output and improves it through multiple iterations until it meets quality standards.
 
 ```mermaid
-graph LR
-    A[Generate] --> B[Critique]
-    B --> C{Quality OK?}
-    C -->|No| D[Refine]
-    D --> A
-    C -->|Yes| E[Save]
-    
+stateDiagram-v2
+    [*] --> Analyze
+    Analyze --> Semantic
+    Semantic --> Generate
+    Generate --> Critique
+    Critique --> LoopCheck
+    LoopCheck --> Generate : continue
+    LoopCheck --> [*] : finish
+
     classDef processNode fill:#1e3a8a,stroke:#3b82f6,color:#fff
     classDef decisionNode fill:#065f46,stroke:#10b981,color:#fff
     classDef endNode fill:#7c2d12,stroke:#f97316,color:#fff
-    
-    class A,B,D processNode
-    class C decisionNode
-    class E endNode
+
+    class Analyze,Semantic,Generate,Critique processNode
+    class LoopCheck decisionNode
 ```
 
 ### 🎯 Smart File Prioritization
@@ -46,6 +47,14 @@ Detects your project type automatically:
 | **Frontend** | `package.json`, React/Vue/Svelte files, `webpack.config.js` |
 | **Backend** | `pom.xml`, `build.gradle`, `requirements.txt`, `go.mod`, `Cargo.toml` |
 | **Mixed** | Contains both frontend and backend indicators |
+
+### 🧠 Semantic Code Analysis
+
+Performs deep analysis of code relationships, dependencies, and architectural patterns to create contextually rich documentation.
+
+- **Dependency Mapping**: Understands function calls, imports, and inheritance
+- **Architecture Recognition**: Identifies design patterns and structural elements
+- **Relationship Analysis**: Maps how components interact within your codebase
 
 ### 📊 Multi-Format Output
 

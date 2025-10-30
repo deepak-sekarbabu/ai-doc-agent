@@ -17,7 +17,7 @@ Generate documentation for a simple Python project:
 cd my-python-project
 
 # Generate documentation
-python /path/to/ai-doc-agent/run.py
+ai-doc-agent
 ```
 
 **Output:** `output/my-python-project_documentation.md`
@@ -44,10 +44,10 @@ flask-api/
 **Generate Documentation:**
 
 ```bash
-python run.py \
-  --directory ./flask-api \
-  --project-type backend \
-  --model codellama \
+ai-doc-agent \
+--directory ./flask-api \
+--project-type backend \
+--model codellama \
   --format html \
   --output flask_api_docs
 ```
@@ -82,12 +82,12 @@ react-app/
 **Generate Documentation:**
 
 ```bash
-python run.py \
-  --directory ./react-app \
-  --project-type frontend \
-  --format markdown \
-  --iterations 4 \
-  --output react_component_docs
+ai-doc-agent \
+--directory ./react-app \
+--project-type frontend \
+--format markdown \
+--max-iterations 4 \
+--output react_component_docs
 ```
 
 **Expected Output:**
@@ -118,17 +118,17 @@ fullstack-app/
 
 ```bash
 # Document entire project
-python run.py \
-  --directory ./fullstack-app \
-  --project-type mixed \
-  --max-files 100 \
-  --iterations 5 \
-  --format pdf \
-  --output comprehensive_docs
+ai-doc-agent \
+--directory ./fullstack-app \
+--project-type mixed \
+--max-files 100 \
+--max-iterations 5 \
+--format pdf \
+--output comprehensive_docs
 
 # Or document separately
-python run.py --directory ./fullstack-app/frontend --project-type frontend
-python run.py --directory ./fullstack-app/backend --project-type backend
+ai-doc-agent --directory ./fullstack-app/frontend --project-type frontend
+ai-doc-agent --directory ./fullstack-app/backend --project-type backend
 ```
 
 **Expected Output:**
@@ -160,19 +160,19 @@ microservices/
 ```bash
 # Document each service
 for service in user-service auth-service payment-service; do
-  python run.py \
-    --directory ./microservices/$service \
-    --project-type backend \
-    --output ${service}_docs \
-    --format html
+ai-doc-agent \
+--directory ./microservices/$service \
+--project-type backend \
+--output ${service}_docs \
+--format html
 done
 
 # Combine later or document entire system
-python run.py \
-  --directory ./microservices \
-  --max-files 150 \
-  --output microservices_architecture \
-  --iterations 5
+ai-doc-agent \
+--directory ./microservices \
+--max-files 150 \
+--output microservices_architecture \
+--max-iterations 5
 ```
 
 ---
@@ -195,12 +195,12 @@ mobile-app/
 **Generate Documentation:**
 
 ```bash
-python run.py \
-  --directory ./mobile-app \
-  --project-type frontend \
-  --max-files 75 \
-  --format html \
-  --output mobile_app_docs
+ai-doc-agent \
+--directory ./mobile-app \
+--project-type frontend \
+--max-files 75 \
+--format html \
+--output mobile_app_docs
 ```
 
 ---
@@ -226,12 +226,12 @@ spring-api/
 **Generate Documentation:**
 
 ```bash
-python run.py \
+ai-doc-agent \
   --directory ./spring-api \
   --project-type backend \
   --model codellama \
   --max-files 80 \
-  --iterations 4 \
+  --max-iterations 4 \
   --output spring_api_reference
 ```
 
@@ -256,7 +256,7 @@ go-service/
 **Generate Documentation:**
 
 ```bash
-python run.py \
+ai-doc-agent \
   --directory ./go-service \
   --project-type backend \
   --model codellama \
@@ -282,7 +282,7 @@ vue-app/
 **Generate Documentation:**
 
 ```bash
-python run.py \
+ai-doc-agent \
   --directory ./vue-app \
   --project-type frontend \
   --format html \
@@ -301,19 +301,19 @@ PROJECT_DIR="./my-project"
 OUTPUT_NAME="project_docs"
 
 # Markdown for GitHub
-python run.py \
+ai-doc-agent \
   --directory $PROJECT_DIR \
   --format markdown \
   --output $OUTPUT_NAME
 
 # HTML for web viewing
-python run.py \
+ai-doc-agent \
   --directory $PROJECT_DIR \
   --format html \
   --output $OUTPUT_NAME
 
 # PDF for printing
-python run.py \
+ai-doc-agent \
   --directory $PROJECT_DIR \
   --format pdf \
   --output $OUTPUT_NAME
@@ -352,11 +352,11 @@ jobs:
       
       - name: Generate documentation
         run: |
-          python run.py \
+          ai-doc-agent \
             --directory . \
             --format markdown \
             --output docs/API_REFERENCE \
-            --iterations 3
+            --max-iterations 3
       
       - name: Commit documentation
         run: |
@@ -388,11 +388,11 @@ for project in "${PROJECTS[@]}"; do
   
   echo "Generating docs for $project_name..."
   
-  python run.py \
+  ai-doc-agent \
     --directory $project \
     --output ${project_name}_docs \
     --format html \
-    --iterations 3 \
+    --max-iterations 3 \
     --verbose
   
   echo "✓ Completed $project_name"
@@ -422,9 +422,9 @@ EOF
 cp .env.custom .env
 
 # Generate with high quality
-python run.py \
+ai-doc-agent \
   --directory ./important-project \
-  --iterations 10 \
+  --max-iterations 10 \
   --max-files 200 \
   --format pdf \
   --output premium_documentation \
@@ -437,19 +437,19 @@ python run.py \
 
 ```bash
 # Django project
-python run.py \
+ai-doc-agent \
   --directory ./django-app \
   --project-type backend \
   --max-files 80
 
 # FastAPI
-python run.py \
+ai-doc-agent \
   --directory ./fastapi-service \
   --project-type backend \
   --model codellama
 
 # Data Science project
-python run.py \
+ai-doc-agent \
   --directory ./ml-project \
   --max-files 50 \
   --format html
@@ -459,18 +459,18 @@ python run.py \
 
 ```bash
 # Express API
-python run.py \
+ai-doc-agent \
   --directory ./express-api \
   --project-type backend
 
 # Next.js app
-python run.py \
+ai-doc-agent \
   --directory ./nextjs-app \
   --project-type frontend \
   --max-files 100
 
 # Angular app
-python run.py \
+ai-doc-agent \
   --directory ./angular-app \
   --project-type frontend
 ```
@@ -479,13 +479,13 @@ python run.py \
 
 ```bash
 # Spring Boot
-python run.py \
+ai-doc-agent \
   --directory ./spring-boot-app \
   --project-type backend \
   --model codellama
 
 # Maven project
-python run.py \
+ai-doc-agent \
   --directory ./maven-project \
   --max-files 100
 ```
@@ -494,7 +494,7 @@ python run.py \
 
 ```bash
 # Go service
-python run.py \
+ai-doc-agent \
   --directory ./go-service \
   --project-type backend \
   --model codellama
@@ -508,7 +508,7 @@ Use the included example:
 
 ```bash
 # Test with sample project
-python run.py \
+ai-doc-agent \
   --directory ./examples \
   --max-files 5 \
   --verbose
@@ -598,15 +598,15 @@ Retrieve all users from database.
 # Problem: Project with 500+ files times out
 
 # Solution 1: Limit files
-python run.py --directory ./large-project --max-files 100
+ai-doc-agent --directory ./large-project --max-files 100
 
 # Solution 2: Increase timeout
 # In .env: API_TIMEOUT=900
-python run.py --directory ./large-project
+ai-doc-agent --directory ./large-project
 
 # Solution 3: Document in parts
-python run.py --directory ./large-project/backend --output backend_docs
-python run.py --directory ./large-project/frontend --output frontend_docs
+ai-doc-agent --directory ./large-project/backend --output backend_docs
+ai-doc-agent --directory ./large-project/frontend --output frontend_docs
 ```
 
 ### Issue: Poor Quality Output
@@ -615,16 +615,16 @@ python run.py --directory ./large-project/frontend --output frontend_docs
 # Problem: Documentation lacks detail
 
 # Solution 1: More iterations
-python run.py --directory ./project --iterations 7
+ai-doc-agent --directory ./project --max-iterations 7
 
 # Solution 2: Better model
-python run.py --directory ./project --model codellama
+ai-doc-agent --directory ./project --model codellama
 
 # Solution 3: More files
-python run.py --directory ./project --max-files 100
+ai-doc-agent --directory ./project --max-files 100
 
 # Solution 4: Specify project type
-python run.py --directory ./project --project-type backend
+ai-doc-agent --directory ./project --project-type backend
 ```
 
 ## Best Practices
@@ -633,34 +633,34 @@ python run.py --directory ./project --project-type backend
 
 ```bash
 # Test with limited files first
-python run.py --directory ./project --max-files 20 --iterations 2
+ai-doc-agent --directory ./project --max-files 20 --max-iterations 2
 
 # Then scale up
-python run.py --directory ./project --max-files 100 --iterations 5
+ai-doc-agent --directory ./project --max-files 100 --max-iterations 5
 ```
 
 ### 2. Use Appropriate Models
 
 ```bash
 # Quick testing
-python run.py --model llama2:7b
+ai-doc-agent --model llama2:7b
 
 # Production docs
-python run.py --model codellama
+ai-doc-agent --model codellama
 ```
 
 ### 3. Specify Project Type
 
 ```bash
 # More accurate results
-python run.py --project-type backend
+ai-doc-agent --project-type backend
 ```
 
 ### 4. Use Verbose Mode
 
 ```bash
 # See what's happening
-python run.py --verbose
+ai-doc-agent --verbose
 ```
 
 ## Next Steps

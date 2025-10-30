@@ -19,4 +19,4 @@ services:
     # Use host network to access local Ollama
     network_mode: host
     # Override command to analyze current directory
-    command: ["--directory", "/workspace", "--format", "markdown"]
+    command: [ "--directory", "/workspace", "--format", "markdown" ]

@@ -1,6 +1,6 @@
 # Configuration Reference
 
-Complete reference for all configuration options, environment variables, and settings.
+Complete reference for all configuration options, environment variables, and settings in AI Documentation Agent v2.0.0.
 
 ## Overview
 
@@ -38,7 +38,7 @@ nano .env  # or vim, code, etc.
 
 **Type:** String (URL)  
 **Required:** No  
-**Default:** `https://ollama.com/api/generate`
+**Default:** `http://localhost:11434/api/generate`
 
 **Valid Values:**
 ```bash
@@ -339,6 +339,46 @@ CRITIQUE_THRESHOLD=0.95
 
 ---
 
+#### MAX_FILES
+
+**Description:** Maximum number of files to analyze
+
+**Type:** Integer
+**Required:** No
+**Default:** `100`
+
+**Valid Values:**
+```bash
+# Quick analysis (small projects)
+MAX_FILES=20
+
+# Standard analysis (medium projects)
+MAX_FILES=100
+
+# Comprehensive analysis (large projects)
+MAX_FILES=500
+
+# Unlimited (use with caution)
+MAX_FILES=1000
+```
+
+**Impact:**
+
+| File Count | Analysis Time | Documentation Quality | Use Case |
+|------------|---------------|----------------------|----------|
+| 20 | Fast (~1 min) | Basic | Small projects, testing |
+| 100 | Medium (~5 min) | Good | Standard projects |
+| 500 | Slow (~20 min) | Excellent | Large projects |
+| 1000+ | Very slow | Comprehensive | Enterprise projects |
+
+**Usage:**
+- Small projects → 20-50 files
+- Medium projects → 50-200 files
+- Large projects → 200-500 files
+- Very large projects → 500+ files
+
+---
+
 ## Configuration Profiles
 
 ### Development Profile
@@ -400,7 +440,7 @@ ENABLE_CACHING=true
 
 **Use with:**
 ```bash
-python run.py --iterations 3
+ai-doc-agent --iterations 3
 ```
 
 ---
@@ -421,7 +461,7 @@ ENABLE_CACHING=false
 
 **Use with:**
 ```bash
-python run.py --max-files 10 --iterations 1
+ai-doc-agent --max-files 10 --iterations 1
 ```
 
 ---
@@ -442,7 +482,7 @@ ENABLE_CACHING=true
 
 **Use with:**
 ```bash
-python run.py --format markdown --output docs/API
+ai-doc-agent --format markdown --output docs/API
 ```
 
 ---
@@ -453,18 +493,18 @@ Command-line options override `.env` settings:
 
 ```bash
 # Model override
-python run.py --model mistral
+ai-doc-agent --model mistral
 # Overrides MODEL_NAME in .env
 
 # Format override
-python run.py --format html
+ai-doc-agent --format html
 # Does not affect .env
 
 # Multiple overrides
-python run.py \
-  --model codellama \
-  --iterations 5 \
-  --max-files 100
+ai-doc-agent \
+--model codellama \
+--iterations 5 \
+--max-files 100
 ```
 
 **Precedence Order:**

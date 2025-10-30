@@ -1,8 +1,8 @@
 # Installation
 
-Complete installation guide for all platforms and deployment methods.
+Complete installation guide for AI Documentation Agent v2.0.0 with semantic analysis.
 
-## System Requirements
+## System Requirements {#requirements}
 
 | Requirement | Minimum | Recommended |
 |-------------|---------|-------------|
@@ -10,6 +10,7 @@ Complete installation guide for all platforms and deployment methods.
 | RAM | 4 GB | 8 GB+ |
 | Disk Space | 500 MB | 2 GB |
 | Ollama | Any version | Latest |
+| wkhtmltopdf | Optional | For PDF output |
 
 ## Method 1: Direct Installation
 
@@ -61,21 +62,25 @@ Best for development and customization.
 ### 3. Clone Repository
 
 ```bash
-git clone https://github.com/yourusername/ai-doc-agent.git
+git clone https://github.com/deepak-sekarbabu/ai-doc-agent.git
 cd ai-doc-agent
 ```
 
-### 4. Install Dependencies
+### 4. Install Package
 
 ```bash
-pip install -r config/requirements.txt
+python -m venv .venv
+source .venv/bin/activate      # Windows: .venv\\Scripts\\activate
+pip install -e .[dev]          # Installs console scripts
 ```
+
+This installs the package in editable mode with development dependencies and registers the `ai-doc-agent` console script.
 
 ### 5. Configure
 
 ```bash
-cp config/.env.example .env
-# Edit .env with your settings
+cp .env.example .env
+# Edit .env with your settings (see Configuration guide)
 ```
 
 ### 6. Pull LLM Model
@@ -87,8 +92,8 @@ ollama pull llama2:7b
 ### 7. Test Installation
 
 ```bash
-python run.py --help
-python run.py --directory ./examples
+ai-doc-agent --help
+ai-doc-agent --directory ./examples
 ```
 
 ## Method 2: Standalone Executable
@@ -99,9 +104,9 @@ See [Bundling Guide](../deployment/bundling.md) for building executables.
 
 Download pre-built executables:
 
-- [Windows x64](https://github.com/yourusername/ai-doc-agent/releases)
-- [Linux x64](https://github.com/yourusername/ai-doc-agent/releases)
-- [macOS x64](https://github.com/yourusername/ai-doc-agent/releases)
+- [Windows x64](https://github.com/deepak-sekarbabu/ai-doc-agent/releases)
+- [Linux x64](https://github.com/deepak-sekarbabu/ai-doc-agent/releases)
+- [macOS x64](https://github.com/deepak-sekarbabu/ai-doc-agent/releases)
 
 ## Method 3: Docker
 
@@ -146,6 +151,12 @@ ai-doc-agent --help
 doc-generator --help
 ```
 
+Or for development:
+
+```bash
+pip install -e .[dev]
+```
+
 ## Optional: PDF Support
 
 For PDF generation, install wkhtmltopdf:
@@ -180,10 +191,10 @@ python --version  # Should be 3.8+
 ollama --version
 
 # Check agent
-python run.py --help
+ai-doc-agent --help
 
 # Generate test docs
-python run.py --directory ./examples --output test
+ai-doc-agent --directory ./examples --output test
 ```
 
 ## Troubleshooting
@@ -223,7 +234,7 @@ python run.py --directory ./examples --output test
     
     ```bash
     pip install --upgrade pip
-    pip install -r config/requirements.txt
+    pip install -e .[dev]
     ```
 
 ## Next Steps

@@ -1,46 +1,47 @@
 # AI Agent Guide
 
-Complete guide to using the AI Documentation Agent with iterative refinement.
+Complete guide to using the AI Documentation Agent v2.0.0 with semantic analysis and iterative refinement.
 
 ## Overview
 
-The AI Agent (`src/langgraph_agent.py`) is the default implementation of the documentation agent, built using LangGraph. It uses an iterative critique-refine cycle to generate high-quality documentation that improves with each iteration.
+The AI Agent (`src/langgraph_agent.py`) is the default implementation of the documentation agent, built using LangGraph. It performs semantic code analysis and uses an iterative critique-refine cycle to generate high-quality documentation that improves with each iteration.
 
-> **Note**: This guide covers the LangGraph-based implementation. The project also includes an [original AIAgent implementation](../features/agent-implementations.md) with a different architectural approach.
+> **Note**: This guide covers the LangGraph-based implementation with semantic analysis. The project also includes an [original AIAgent implementation](../features/agent-implementations.md) with similar functionality.
 
 ## How It Works
 
 The AI Agent follows a sophisticated workflow, which is implemented as a stateful graph using LangGraph:
 
 ```mermaid
-graph TD
-    A[Start] --> B[Analyze Codebase]
-    B --> C[Detect Project Type]
-    C --> D[Find & Prioritize Files]
-    D --> E[Read File Contents]
-    E --> F[Generate Initial Documentation]
-    F --> G[Self-Critique]
-    G --> H{Quality Acceptable?}
-    H -->|No| I[Refine Documentation]
-    I --> G
-    H -->|Yes| J{Max Iterations?}
-    J -->|No| I
-    J -->|Yes| K[Save Documentation]
-    K --> L[Report Metrics]
-    L --> M[End]
-    
+stateDiagram-v2
+    [*] --> Analyze
+    Analyze --> Semantic
+    Semantic --> Generate
+    Generate --> Critique
+    Critique --> LoopCheck
+    LoopCheck --> Generate : continue
+    LoopCheck --> [*] : finish
+
     classDef processNode fill:#1e3a8a,stroke:#3b82f6,color:#fff
     classDef decisionNode fill:#065f46,stroke:#10b981,color:#fff
     classDef endNode fill:#7c2d12,stroke:#f97316,color:#fff
-    
-    class A,B,C,D,E,F,G,I,K,L processNode
-    class H,J decisionNode
-    class M endNode
+
+    class Analyze,Semantic,Generate,Critique processNode
+    class LoopCheck decisionNode
 ```
 
 ## Key Features
 
-### 1. Iterative Refinement
+### 1. Semantic Code Analysis
+
+The agent performs deep analysis of your codebase before generating documentation:
+
+- **Dependency Analysis**: Maps function calls, imports, and inheritance relationships
+- **Architecture Recognition**: Identifies design patterns and structural elements
+- **Central Component Detection**: Finds the most important files and functions
+- **Cross-File Relationships**: Understands how components interact
+
+### 2. Iterative Refinement
 
 The agent doesn't settle for the first draft:
 
@@ -63,7 +64,7 @@ Critique → "Excellent quality, comprehensive coverage"
 → Accept ✓
 ```
 
-### 2. Self-Critique
+### 3. Self-Critique
 
 The agent evaluates its own work against quality criteria:
 
@@ -74,7 +75,7 @@ The agent evaluates its own work against quality criteria:
 - **Examples** - Sufficient code samples?
 - **Deployment** - Setup instructions clear?
 
-### 3. Smart File Analysis
+### 4. Smart File Analysis
 
 Prioritizes important files based on project type:
 
@@ -98,13 +99,13 @@ Priority 3: Controllers, services, models
 
 ```bash
 # Quick launcher (uses default settings)
-python run.py
+ai-doc-agent
 
 # Analyze specific project
-python run.py --directory ~/my-project
+ai-doc-agent --directory ~/my-project
 
 # Custom output name
-python run.py --directory ~/my-app --output my_documentation
+ai-doc-agent --directory ~/my-app --output my_documentation
 ```
 
 
@@ -115,81 +116,81 @@ python run.py --directory ~/my-app --output my_documentation
 
 ```bash
 # Analyze current directory
-python run.py
+ai-doc-agent
 
 # Analyze specific directory (relative)
-python run.py --directory ./my-app
+ai-doc-agent --directory ./my-app
 
 # Analyze specific directory (absolute)
-python run.py --directory /home/user/projects/my-app
+ai-doc-agent --directory /home/user/projects/my-app
 ```
 
 #### Model Options
 
 ```bash
 # Use default model from .env
-python run.py
+ai-doc-agent
 
 # Override with specific model
-python run.py --model codellama
+ai-doc-agent --model codellama
 
 # Fast model for quick docs
-python run.py --model llama2:7b
+ai-doc-agent --model llama2:7b
 
 # High-quality model
-python run.py --model llama2:13b
+ai-doc-agent --model llama2:13b
 ```
 
 #### Output Options
 
 ```bash
 # Default format (Markdown)
-python run.py
+ai-doc-agent
 
 # HTML output
-python run.py --format html
+ai-doc-agent --format html
 
 # PDF output (requires wkhtmltopdf)
-python run.py --format pdf
+ai-doc-agent --format pdf
 
 # Custom filename
-python run.py --output my_project_documentation
+ai-doc-agent --output my_project_documentation
 ```
 
 #### Quality Options
 
 ```bash
 # Quick documentation (2 iterations)
-python run.py --iterations 2 --max-files 20
+ai-doc-agent --iterations 2 --max-files 20
 
 # Standard quality (default)
-python run.py --iterations 3 --max-files 30
+ai-doc-agent --iterations 3 --max-files 30
 
 # Maximum quality
-python run.py --iterations 5 --max-files 100
+ai-doc-agent --iterations 5 --max-files 100
 ```
 
 #### Project Type
 
 ```bash
 # Auto-detect (default)
-python run.py
+ai-doc-agent
 
 # Explicitly specify frontend
-python run.py --project-type frontend
+ai-doc-agent --project-type frontend
 
 # Explicitly specify backend
-python run.py --project-type backend
+ai-doc-agent --project-type backend
 
 # Mixed project
-python run.py --project-type mixed
+ai-doc-agent --project-type mixed
 ```
 
 #### Debugging
 
 ```bash
 # Enable verbose logging
-python run.py --verbose
+ai-doc-agent --verbose
 
 # Check logs
 tail -f ai_agent.log

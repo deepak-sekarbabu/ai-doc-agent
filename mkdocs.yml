@@ -120,9 +120,10 @@ nav:
     - API Reference: reference/api.md
     - Configuration: reference/config.md
   - Development:
-    - Contributing: development/contributing.md
-    - Testing: development/testing.md
-    - Changelog: development/changelog.md
+     - Contributing: development/contributing.md
+     - Testing: development/testing.md
+     - Changelog: development/changelog.md
+     - Improvements: IMPROVEMENTS.md
   - Examples:
     - Sample Projects: examples/samples.md
     - Troubleshooting: examples/troubleshooting.md

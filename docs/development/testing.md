@@ -1,33 +1,34 @@
 # Testing
 
-Comprehensive guide to testing the AI Documentation Agent.
+Comprehensive guide to testing the AI Documentation Agent v2.0.0 with semantic analysis.
 
 ## Overview
 
-Testing ensures the AI Documentation Agent works correctly and reliably. This guide covers unit testing, integration testing, and manual testing approaches.
+Testing ensures the AI Documentation Agent works correctly and reliably. This guide covers unit testing, integration testing, and manual testing approaches for the semantic analysis features.
 
 ## Test Framework
 
-The project uses **pytest** as the testing framework.
+The project uses **pytest** as the testing framework with comprehensive test coverage.
 
 ### Why pytest?
 
 - ✅ Simple and intuitive syntax
-- ✅ Powerful fixtures
+- ✅ Powerful fixtures and mocking
 - ✅ Excellent test discovery
 - ✅ Rich plugin ecosystem
 - ✅ Detailed failure reports
+- ✅ Coverage reporting with pytest-cov
 
 ## Setup
 
 ### Install Testing Dependencies
 
 ```bash
-# Install pytest and related tools
-pip install pytest pytest-cov pytest-mock
+# Install with development dependencies
+pip install -e .[dev]
 
-# Or install from requirements
-pip install -r config/requirements.txt
+# Or install testing tools individually
+pip install pytest pytest-cov pytest-mock
 ```
 
 ### Verify Installation
@@ -68,15 +69,32 @@ import pytest
 from src.doc_generator import detect_project_type, find_code_files
 
 def test_detect_frontend_project(tmp_path):
-    """Test detection of frontend projects."""
+"""Test detection of frontend projects."""
+# Arrange
+(tmp_path / "package.json").touch()
+
+# Act
+result = detect_project_type(str(tmp_path))
+
+# Assert
+assert result == "frontend"
+
+# tests/test_semantic_analyzer.py
+import pytest
+from src.utils.semantic_code_analyzer import SemanticCodeAnalyzer
+
+def test_semantic_analysis(sample_files):
+    """Test semantic code analysis functionality."""
     # Arrange
-    (tmp_path / "package.json").touch()
-    
+    analyzer = SemanticCodeAnalyzer(sample_files)
+
     # Act
-    result = detect_project_type(str(tmp_path))
-    
+    patterns = analyzer.detect_architecture_patterns()
+    elements = analyzer.get_central_elements()
+
     # Assert
-    assert result == "frontend"
+    assert len(patterns) >= 0
+    assert len(elements) >= 0
 
 def test_detect_backend_project(tmp_path):
     """Test detection of backend projects."""
@@ -283,23 +301,23 @@ Test command-line interface.
 import subprocess
 
 def test_help_command():
-    """Test --help flag."""
-    result = subprocess.run(
-        ["python", "run.py", "--help"],
-        capture_output=True,
-        text=True
-    )
-    assert result.returncode == 0
-    assert "usage" in result.stdout.lower()
+"""Test --help flag."""
+result = subprocess.run(
+["ai-doc-agent", "--help"],
+capture_output=True,
+text=True
+)
+assert result.returncode == 0
+assert "usage" in result.stdout.lower()
 
 def test_version_display():
-    """Test version information."""
-    result = subprocess.run(
-        ["python", "run.py", "--help"],
-        capture_output=True,
-        text=True
-    )
-    assert "AI Documentation Agent" in result.stdout
+"""Test version information."""
+result = subprocess.run(
+["ai-doc-agent", "--help"],
+capture_output=True,
+text=True
+)
+assert "AI Documentation Agent" in result.stdout
 ```
 
 ## Running Tests
@@ -321,16 +339,22 @@ pytest tests/test_doc_generator.py::test_detect_frontend_project
 
 # Run tests matching pattern
 pytest -k "detection"
+
+# Run semantic analysis tests
+pytest -k "semantic"
 ```
 
 ### Test Coverage
 
 ```bash
 # Run with coverage report
-pytest --cov=src tests/
+pytest --cov=src --cov-report=term-missing
 
 # Generate HTML coverage report
-pytest --cov=src --cov-report=html tests/
+pytest --cov=src --cov-report=html
+
+# Check coverage threshold (85% required)
+pytest --cov=src --cov-fail-under=85
 
 # View coverage report
 open htmlcov/index.html  # macOS

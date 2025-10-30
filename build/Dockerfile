@@ -1,41 +1,19 @@
-FROM python:3.11-slim
+FROM python:3.12-slim
 
-# Install wkhtmltopdf for PDF support
-RUN apt-get update && \
-    apt-get install -y wkhtmltopdf && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+# Install OS-level deps (wkhtmltopdf)
+RUN apt-get update && apt-get install -y wkhtmltopdf && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
+# Create a non-root user
+RUN groupadd -r app && useradd -r -g app app
 WORKDIR /app
+COPY . /app
 
-# Copy requirements first for better caching
-COPY config/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Install the package (editable not needed)
+RUN python -m venv .venv \
+    && . .venv/bin/activate \
+    && pip install -e .[dev]
 
-# Copy application files
-COPY src/ai_agent.py .
-COPY src/doc_generator.py .
+USER app
 
-# Copy .env if it exists, otherwise use .env.example
-COPY config/.env* ./
-RUN if [ -f .env ]; then \
-        echo "Using existing .env file"; \
-    elif [ -f .env.example ]; then \
-        cp .env.example .env && echo "Created .env from .env.example"; \
-    else \
-        echo "Warning: No .env file found"; \
-    fi
-
-# Create directory for output
-RUN mkdir -p /output
-
-# Set environment variables
-ENV PYTHONUNBUFFERED=1
-
-# Create entrypoint script
-RUN echo '#!/bin/bash\ncd /workspace && python /app/ai_agent.py "$@"' > /entrypoint.sh && \
-    chmod +x /entrypoint.sh
-
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["ai-doc-agent"]
 CMD ["--help"]

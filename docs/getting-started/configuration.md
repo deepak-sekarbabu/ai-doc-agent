@@ -10,7 +10,7 @@ The agent uses a `.env` file for configuration located in the project root.
 
 ```bash
 # Copy the example configuration
-cp config/.env.example .env
+cp .env.example .env
 
 # Edit with your preferred editor
 nano .env  # or vim, code, notepad++, etc.
@@ -24,8 +24,8 @@ nano .env  # or vim, code, notepad++, etc.
 
 The URL endpoint for the Ollama API.
 
-**Default:** `https://ollama.com/api/generate`  
-**Local:** `http://localhost:11434/api/generate`
+**Default:** `http://localhost:11434/api/generate`  
+**Cloud:** `https://ollama.com/api/generate`
 
 ```bash
 # For local Ollama installation
@@ -207,7 +207,7 @@ CRITIQUE_THRESHOLD=0.7
 
 **Use with:**
 ```bash
-python run.py --max-files 20 --iterations 2
+ai-doc-agent --max-files 20 --iterations 2
 ```
 
 ### Production Profile
@@ -225,7 +225,7 @@ CRITIQUE_THRESHOLD=0.9
 
 **Use with:**
 ```bash
-python run.py --iterations 5 --max-files 100
+ai-doc-agent --iterations 5 --max-files 100
 ```
 
 ### Cloud Profile
@@ -257,7 +257,7 @@ CRITIQUE_THRESHOLD=0.6
 
 **Use with:**
 ```bash
-python run.py --max-files 10 --iterations 1
+ai-doc-agent --max-files 10 --iterations 1
 ```
 
 ## Command-Line Overrides
@@ -266,13 +266,13 @@ Command-line options override `.env` settings:
 
 ```bash
 # Model override
-python run.py --model mistral
+ai-doc-agent --model mistral
 
 # Format override
-python run.py --format html
+ai-doc-agent --format html
 
 # Multiple overrides
-python run.py --model codellama --iterations 5 --max-files 100
+ai-doc-agent --model codellama --iterations 5 --max-files 100
 ```
 
 ## Verification
@@ -284,7 +284,7 @@ python run.py --model codellama --iterations 5 --max-files 100
 cat .env
 
 # Test configuration
-python run.py --help
+ai-doc-agent --help
 
 # Verify Ollama connection
 curl http://localhost:11434/api/tags
@@ -324,7 +324,7 @@ cp .env .env.test
 ```bash
 # Copy desired config before running
 cp .env.prod .env
-python run.py
+ai-doc-agent
 ```
 
 ### Custom Model Settings
@@ -350,7 +350,7 @@ MAX_RETRIES=2
 CRITIQUE_THRESHOLD=0.7
 ```
 
-**Command:** `python run.py --max-files 20 --iterations 2`
+**Command:** `ai-doc-agent --max-files 20 --iterations 2`
 
 #### For Quality
 
@@ -361,7 +361,7 @@ MAX_RETRIES=5
 CRITIQUE_THRESHOLD=0.9
 ```
 
-**Command:** `python run.py --max-files 100 --iterations 5`
+**Command:** `ai-doc-agent --max-files 100 --iterations 5`
 
 #### For Reliability
 
@@ -447,7 +447,7 @@ MAX_RETRIES=3
 
 ```bash
 # Use verbose mode to see timing
-python run.py --verbose
+ai-doc-agent --verbose
 
 # Check logs
 tail -f ai_agent.log

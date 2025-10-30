@@ -1,15 +1,18 @@
 # API Reference
 
-Complete API reference for the AI Documentation Agent modules, classes, and functions.
+Complete API reference for the AI Documentation Agent v2.0.0 modules, classes, and functions with semantic analysis.
 
 ## Module Overview
 
-The AI Documentation Agent consists of two main modules:
+The AI Documentation Agent consists of several key modules:
 
 | Module | Purpose | Entry Point |
 |--------|---------|-------------|
-| `ai_agent` | Iterative refinement agent | `src/ai_agent.py` |
+| `ai_agent` | Original iterative refinement agent with semantic analysis | `src/ai_agent.py` |
+| `langgraph_agent` | LangGraph-based agent with semantic analysis | `src/langgraph_agent.py` |
 | `doc_generator` | Core documentation utilities | `src/doc_generator.py` |
+| `semantic_code_analyzer` | Code relationship and architecture analysis | `src/utils/semantic_code_analyzer.py` |
+| `semantic_critique` | Documentation critique and validation | `src/utils/semantic_critique.py` |
 
 ## ai_agent Module
 
@@ -135,7 +138,132 @@ agent = AIAgent(
 
 result = agent.run(max_iterations=7)
 if result == 0:
-    print("Documentation generated successfully!")
+print("Documentation generated successfully!")
+```
+
+---
+
+## semantic_code_analyzer Module
+
+Advanced analyzer for understanding code relationships and dependencies.
+
+### SemanticCodeAnalyzer
+
+```python
+from src.utils.semantic_code_analyzer import SemanticCodeAnalyzer
+
+analyzer = SemanticCodeAnalyzer(file_contents)
+```
+
+#### Methods
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `get_coupling_analysis()` | `Dict[str, float]` | Returns coupling metrics for files |
+| `get_central_elements(top_n)` | `List[Tuple[str, float]]` | Returns most central code elements |
+| `detect_architecture_patterns()` | `List[ArchitecturePattern]` | Detects architectural patterns |
+
+#### Example
+
+```python
+from src.utils.semantic_code_analyzer import SemanticCodeAnalyzer
+
+# Analyze codebase
+analyzer = SemanticCodeAnalyzer(file_contents)
+
+# Get coupling analysis
+coupling = analyzer.get_coupling_analysis()
+print(f"Coupling analysis: {coupling}")
+
+# Get central elements
+central = analyzer.get_central_elements(top_n=5)
+for element, score in central:
+    print(f"{element}: {score}")
+
+# Detect patterns
+patterns = analyzer.detect_architecture_patterns()
+for pattern in patterns:
+    print(f"Pattern: {pattern.pattern_type} - {pattern.description}")
+```
+
+---
+
+## semantic_critique Module
+
+AI-powered documentation critique and validation.
+
+### SemanticCritiqueAnalyzer
+
+```python
+from src.utils.semantic_critique import SemanticCritiqueAnalyzer
+
+analyzer = SemanticCritiqueAnalyzer()
+```
+
+#### Methods
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `analyze_critique_semantically(text)` | `SemanticScore` | Analyzes critique quality |
+
+### DocumentationValidator
+
+```python
+from src.utils.semantic_critique import DocumentationValidator
+
+validator = DocumentationValidator(file_contents)
+```
+
+#### Methods
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `validate_documentation(docs)` | `List[ValidationIssue]` | Validates documentation against code |
+
+---
+
+## langgraph_agent Module
+
+LangGraph-based agent implementation with semantic analysis workflow.
+
+### AgentState
+
+Typed dictionary defining the state passed between LangGraph nodes.
+
+```python
+from src.langgraph_agent import AgentState
+
+state: AgentState = {
+    "directory": Path("./project"),
+    "max_files": 100,
+    "model": "codellama",
+    "file_contents": [...],
+    "documentation": None,
+    "semantic_analyzer": None,
+    "semantic_analysis": None,
+    # ... other fields
+}
+```
+
+### Workflow Nodes
+
+| Node Function | Purpose |
+|---------------|---------|
+| `analyze_codebase` | Discovers and reads code files |
+| `perform_semantic_analysis` | Analyzes code relationships and architecture |
+| `generate_draft` | Creates initial documentation with semantic insights |
+| `critique_document` | AI-powered critique of documentation |
+| `refine_document` | Improves documentation based on critique |
+
+### Example Usage
+
+```python
+from src.langgraph_agent import build_graph
+
+# Create and run the graph
+app = build_graph()
+result = app.invoke(initial_state)
+print(f"Documentation: {result['documentation']}")
 ```
 
 ---

@@ -1,6 +1,6 @@
 # Quick Start
 
-Get up and running with AI Documentation Agent in under 5 minutes!
+Get up and running with AI Documentation Agent v2.0.0 in under 5 minutes!
 
 ## Prerequisites
 
@@ -9,6 +9,7 @@ Before you begin, ensure you have:
 - ✅ Python 3.8 or higher
 - ✅ Ollama installed and running
 - ✅ Git (for cloning the repository)
+- ✅ wkhtmltopdf (optional, for PDF generation)
 
 ## Installation Steps
 
@@ -19,19 +20,23 @@ git clone https://github.com/deepak-sekarbabu/ai-doc-agent.git
 cd ai-doc-agent
 ```
 
-### 2. Install Dependencies
+### 2. Install Package
 
 ```bash
-pip install -r config/requirements.txt
+python -m venv .venv
+source .venv/bin/activate      # Windows: .venv\\Scripts\\activate
+pip install -e .[dev]          # Installs console scripts
 ```
+
+This installs the package in editable mode with development dependencies and registers the `ai-doc-agent` console script.
 
 ### 3. Configure Environment
 
 ```bash
-cp config/.env.example .env
+cp .env.example .env
 ```
 
-The default configuration works for most users. Edit `.env` if you need custom settings.
+The default configuration works for most users. Edit `.env` if you need custom settings (see [Configuration](configuration.md) for details).
 
 ### 4. Start Ollama
 
@@ -44,12 +49,11 @@ The default configuration works for most users. Edit `.env` if you need custom s
 ### 5. Pull an LLM Model
 
 ```bash
-# Recommended for getting started (fast, good quality)
-ollama pull llama2:7b
-
-# Or choose an alternative:
-# ollama pull mistral        # Better quality
-# ollama pull codellama      # Best for code
+# Recommended models (choose based on your needs):
+ollama pull llama2:7b          # Fast, good quality (2GB)
+ollama pull mistral:7b         # Better quality (4GB)
+ollama pull codellama:7b       # Best for code (4GB)
+ollama pull gpt-oss:120b-cloud # Cloud model (requires API key)
 ```
 
 ## Your First Documentation
@@ -57,14 +61,14 @@ ollama pull llama2:7b
 ### Generate docs for the sample project:
 
 ```bash
-python run.py --directory ./examples --output my_first_docs
+ai-doc-agent --directory ./examples --output my_first_docs
 ```
 
 This will:
 
-1. ✅ Analyze the example project
-2. ✅ Generate comprehensive documentation
-3. ✅ Save to `output/my_first_docs.md`
+1. ✅ Analyze the example project with semantic code analysis
+2. ✅ Generate comprehensive documentation with AI refinement
+3. ✅ Save to `my_first_docs.md` in the current directory
 
 ### Check the output:
 
@@ -81,57 +85,57 @@ code output/my_first_docs.md
 Now try it on your own project:
 
 ```bash
-python run.py --directory /path/to/your/project
+ai-doc-agent --directory /path/to/your/project
 ```
 
 ### Quick Examples
 
 === "Basic"
 
-    ```bash
-    # Analyze current directory
-    python run.py
-    ```
+```bash
+# Analyze current directory
+ai-doc-agent
+```
 
 === "HTML Output"
 
-    ```bash
-    # Generate HTML documentation
-    python run.py --directory ./my-app --format html
-    ```
+```bash
+# Generate HTML documentation
+ai-doc-agent --directory ./my-app --format html
+```
 
 === "High Quality"
 
-    ```bash
-    # Maximum quality with more iterations
-    python run.py --directory ./my-app --iterations 5 --max-files 100
-    ```
+```bash
+# Maximum quality with more iterations
+ai-doc-agent --directory ./my-app --iterations 5 --max-files 100
+```
 
 === "Specific Type"
 
-    ```bash
-    # Specify project type for better results
-    python run.py --directory ./api --project-type backend
-    ```
+```bash
+# Specify project type for better results
+ai-doc-agent --directory ./api --project-type backend
+```
 
 ## Common Commands
 
 ```bash
 # Quick documentation (fast)
-python run.py --max-files 15 --iterations 2
+ai-doc-agent --max-files 15 --iterations 2
 
 # Standard documentation
-python run.py --directory ~/my-project
+ai-doc-agent --directory ~/my-project
 
 # High-quality documentation
-python run.py --directory ~/my-project --iterations 5 --model codellama
+ai-doc-agent --directory ~/my-project --iterations 5 --model codellama
 
 # Generate HTML or PDF
-python run.py --format html
-python run.py --format pdf
+ai-doc-agent --format html
+ai-doc-agent --format pdf
 
 # Verbose output for debugging
-python run.py --verbose
+ai-doc-agent --verbose
 ```
 
 ## Understanding the Output
@@ -139,12 +143,13 @@ python run.py --verbose
 The generated documentation includes:
 
 1. **Project Overview** - High-level description and purpose
-2. **Architecture** - System design and component structure
-3. **Key Components** - Detailed module documentation
-4. **Development Setup** - Installation and configuration
-5. **Deployment Guide** - Build and hosting instructions
-6. **File Documentation** - Functions, classes, and methods
-7. **Best Practices** - Standards and recommendations
+2. **Architecture & Design** - System design with semantic relationships
+3. **Semantic Code Analysis** - Code dependencies and architectural patterns
+4. **Key Components** - Detailed module documentation with relationships
+5. **Development Setup** - Installation and configuration
+6. **Deployment Guide** - Build and hosting instructions
+7. **File Documentation** - Functions, classes, and methods with examples
+8. **Best Practices** - Standards, security, and recommendations
 
 ## Quick Troubleshooting
 
@@ -156,19 +161,19 @@ The generated documentation includes:
     ```
 
 !!! failure "No files found"
-    
-    **Solution:** Check the directory path:
-    ```bash
-    python run.py --directory /absolute/path/to/project --verbose
-    ```
+
+**Solution:** Check the directory path:
+```bash
+ai-doc-agent --directory /absolute/path/to/project --verbose
+```
 
 !!! failure "API Timeout"
-    
-    **Solution:** Reduce the number of files or increase timeout:
-    ```bash
-    python run.py --max-files 20
-    # Or edit .env: API_TIMEOUT=600
-    ```
+
+**Solution:** Reduce the number of files or increase timeout:
+```bash
+ai-doc-agent --max-files 20
+# Or edit .env: API_TIMEOUT=600
+```
 
 ## Next Steps
 

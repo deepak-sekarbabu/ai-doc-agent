@@ -2,7 +2,7 @@
 
 <div align="center">
   <h2>🤖 Intelligent, Self-Improving Documentation Generator</h2>
-  <p>An autonomous AI agent that generates, critiques, and refines technical documentation for code projects</p>
+  <p><strong>Version 2.0.0</strong> · An autonomous AI agent with semantic code analysis that generates, critiques, and refines technical documentation for code projects</p>
 </div>
 
 ---
@@ -47,85 +47,92 @@ AI Documentation Agent is a powerful tool that uses iterative AI refinement to c
 
     [:octicons-arrow-right-24: Project detection](features/project-detection.md)
 
+-   :material-graph:{ .lg .middle } __Semantic Analysis__
+
+    ---
+
+    Advanced code relationship analysis and architecture recognition
+
+    [:octicons-arrow-right-24: Agent implementations](features/agent-implementations.md)
+
 </div>
 
 ## Quick Start
 
 ```bash
-# Install dependencies
-pip install -r config/requirements.txt
+# 1️⃣ Clone the repository
+git clone https://github.com/deepak-sekarbabu/ai-doc-agent.git
+cd ai-doc-agent
 
-# Configure environment
-cp config/.env.example .env
+# 2️⃣ Create virtual environment & install
+python -m venv .venv
+source .venv/bin/activate      # Windows: .venv\\Scripts\\activate
+pip install -e .[dev]          # Installs console scripts
 
-# Run the agent
-python run.py --directory ./your-project
+# 3️⃣ Run the agent
+ai-doc-agent --directory ./examples
 ```
 
-!!! success "That's it!"
-    The agent will analyze your code, generate documentation, and refine it through multiple iterations.
+!!! success "That's all!"
+    The agent performs semantic analysis, generates documentation with AI refinement, and saves it in your current directory.
 
 ## How It Works
 
 ```mermaid
-graph LR
-    A[Analyze Codebase] --> B[Generate Draft]
-    B --> C[AI Critique]
-    C --> D{Quality OK?}
-    D -->|No| E[Refine]
-    E --> C
-    D -->|Yes| F[Save Documentation]
-    
-    style A fill:#e1f5ff
-    style B fill:#fff3e0
-    style C fill:#f3e5f5
-    style D fill:#e8f5e9
-    style E fill:#fff9c4
-    style F fill:#c8e6c9
+stateDiagram-v2
+    [*] --> Analyze
+    Analyze --> Semantic
+    Semantic --> Generate
+    Generate --> Critique
+    Critique --> LoopCheck
+    LoopCheck --> Generate : continue
+    LoopCheck --> [*] : finish
+
+    style Analyze fill:#e1f5ff
+    style Semantic fill:#fff3e0
+    style Generate fill:#f3e5f5
+    style Critique fill:#e8f5e9
+    style LoopCheck fill:#fff9c4
 ```
 
 ## Installation Methods
 
-=== "Direct Usage"
+=== "Package Installation"
 
-    ```bash
-    pip install -r config/requirements.txt
-    python run.py --help
-    ```
-
-=== "Standalone Executable"
-
-    ```bash
-    cd build
-    build.bat  # Windows
-    ./build.sh  # Linux/Mac
-    ```
-
-=== "Docker"
-
-    ```bash
-    cd build
-    docker-compose run --rm ai-doc-agent
-    ```
-
-=== "Python Package"
-
-    ```bash
-    pip install .
+```bash
+git clone https://github.com/deepak-sekarbabu/ai-doc-agent.git
+cd ai-doc-agent
+pip install -e .[dev]
     ai-doc-agent --help
+    ```
+
+=== "Docker Container"
+
+```bash
+cd build
+docker build -t ai-doc-agent:latest .
+    docker run --rm -v "$(pwd)/project:/src" ai-doc-agent:latest --directory /src
+    ```
+
+=== "PyInstaller Bundle"
+
+```bash
+pip install pyinstaller
+    pyinstaller --onefile src/ai_agent.py --name ai-doc-agent
+    ./dist/ai-doc-agent --help
     ```
 
 ## Example Output
 
 The agent generates comprehensive documentation including:
 
-- ✅ Project Overview
-- ✅ Architecture & Design
-- ✅ Key Components
-- ✅ Development Setup
-- ✅ Deployment Guide
-- ✅ API Reference
-- ✅ Best Practices
+- ✅ Project Overview & Architecture
+- ✅ Semantic Code Analysis & Relationships
+- ✅ Key Components with Dependencies
+- ✅ Development Setup & Configuration
+- ✅ Deployment Guide & Best Practices
+- ✅ API Reference & Usage Examples
+- ✅ Security Considerations & Testing
 
 ## What Makes It Different?
 
@@ -133,8 +140,10 @@ The agent generates comprehensive documentation including:
 |---------|--------------|-------------------|
 | **Self-Improvement** | ✅ Iterative refinement | ❌ Single pass |
 | **AI-Powered** | ✅ Intelligent analysis | ❌ Template-based |
-| **Quality Control** | ✅ Self-critique | ❌ No validation |
+| **Semantic Analysis** | ✅ Code relationships & architecture | ❌ Surface-level |
+| **Quality Control** | ✅ Self-critique & validation | ❌ No validation |
 | **Context-Aware** | ✅ Project type detection | ❌ Generic output |
+| **State Management** | ✅ LangGraph orchestration | ❌ Manual workflows |
 
 ## Use Cases
 
@@ -194,9 +203,18 @@ The agent generates comprehensive documentation including:
 
 ## Requirements
 
-- Python 3.8+
-- Ollama (running locally or remote)
-- wkhtmltopdf (optional, for PDF generation)
+| Requirement | Minimum version / notes |
+|-------------|--------------------------|
+| **Python** | 3.8 + (tested up to 3.12) |
+| **LangGraph** | 0.2.0 |
+| **pdfkit** | 0.6.1 (requires `wkhtmltopdf` binary) |
+| **markdown** | 3.4 |
+| **requests** | 2.31.0 |
+| **python‑dotenv** | 1.0.0 |
+| **git**, **curl** | For API testing and CI |
+| **Ollama** | Running locally or accessible API |
+
+See [Requirements](getting-started/installation.md#requirements) for detailed setup instructions.
 
 ## License
 

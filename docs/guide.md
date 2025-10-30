@@ -1,6 +1,6 @@
-# AI Documentation Agent - Complete Guide
+# AI Documentation Agent v2.0.0 - Complete Guide
 
-Comprehensive documentation for the AI Documentation Agent - an intelligent system that generates, critiques, and refines technical documentation autonomously.
+Comprehensive documentation for the AI Documentation Agent with semantic analysis - an intelligent system that generates, critiques, and refines technical documentation autonomously.
 
 ## Table of Contents
 
@@ -21,16 +21,18 @@ Comprehensive documentation for the AI Documentation Agent - an intelligent syst
 ### What is AI Documentation Agent?
 
 An autonomous AI agent that:
-1. Analyzes your codebase
-2. Generates comprehensive documentation
-3. Critiques its own output
-4. Iteratively refines until quality standards are met
-5. Produces professional documentation in multiple formats
+1. Analyzes your codebase with semantic code analysis
+2. Performs deep relationship and architecture analysis
+3. Generates comprehensive documentation enhanced with semantic insights
+4. Critiques its own output with semantic understanding
+5. Iteratively refines until quality standards are met
+6. Produces professional documentation in multiple formats
 
 ### Key Benefits
 
 - **Save Time** - Automated documentation generation
 - **High Quality** - Iterative refinement ensures comprehensive coverage
+- **Semantic Analysis** - Deep code relationship and architecture understanding
 - **Consistent** - Follows structured documentation patterns
 - **Flexible** - Multiple output formats and customization options
 - **Intelligent** - Auto-detects project type and prioritizes important files
@@ -49,36 +51,44 @@ An autonomous AI agent that:
 
 ```
 ┌─────────────────────────────────────────┐
-│         AI Documentation Agent          │
+│     AI Documentation Agent v2.0.0       │
 ├─────────────────────────────────────────┤
 │                                         │
-│  ┌──────────────────────────────────┐  │
-│  │   Codebase Analyzer              │  │
-│  │   - File Discovery               │  │
-│  │   - Project Type Detection       │  │
-│  │   - Priority Sorting             │  │
-│  └──────────────────────────────────┘  │
+│  ┌──────────────────────────────────┐   │
+│  │   Codebase Analyzer              │   │
+│  │   - File Discovery               │   │
+│  │   - Project Type Detection       │   │
+│  │   - Priority Sorting             │   │
+│  └──────────────────────────────────┘   │
+│                                         │
 │                 ▼                       │
-│  ┌──────────────────────────────────┐  │
-│  │   Documentation Generator        │  │
-│  │   - Template Building            │  │
-│  │   - LLM Integration              │  │
-│  │   - Format Conversion            │  │
-│  └──────────────────────────────────┘  │
+│  ┌──────────────────────────────────┐   │
+│  │   Semantic Code Analyzer         │   │
+│  │   - Relationship Analysis        │   │
+│  │   - Architecture Detection       │   │
+│  │   - Dependency Mapping           │   │
+│  └──────────────────────────────────┘   │
 │                 ▼                       │
-│  ┌──────────────────────────────────┐  │
-│  │   Quality Assurance Loop         │  │
-│  │   - Self-Critique                │  │
-│  │   - Refinement                   │  │
-│  │   - Iteration Control            │  │
-│  └──────────────────────────────────┘  │
+│  ┌──────────────────────────────────┐   │
+│  │   Documentation Generator        │   │
+│  │   - Template Building            │   │
+│  │   - LLM Integration              │   │
+│  │   - Semantic Enhancement         │   │
+│  └──────────────────────────────────┘   │
 │                 ▼                       │
-│  ┌──────────────────────────────────┐  │
-│  │   Output Manager                 │  │
-│  │   - Format Export                │  │
-│  │   - Metrics Reporting            │  │
-│  │   - File Saving                  │  │
-│  └──────────────────────────────────┘  │
+│  ┌──────────────────────────────────┐   │
+│  │   Quality Assurance Loop         │   │
+│  │   - Self-Critique                │   │
+│  │   - Semantic Validation          │   │
+│  │   - Refinement                   │   │
+│  └──────────────────────────────────┘   │
+│                 ▼                       │
+│  ┌──────────────────────────────────┐   │
+│  │   Output Manager                 │   │
+│  │   - Format Export                │   │
+│  │   - Metrics Reporting            │   │
+│  │   - File Saving                  │   │
+│  └──────────────────────────────────┘   │
 │                                         │
 └─────────────────────────────────────────┘
 ```
@@ -160,10 +170,10 @@ nano .env  # or use your preferred editor
 
 ```bash
 # Test the agent
-python run.py --help
+ai-doc-agent --help
 
 # Generate docs for sample project
-python run.py --directory ./examples --output test
+ai-doc-agent --directory ./examples --output test
 ```
 
 ## Configuration
@@ -226,19 +236,19 @@ CRITIQUE_THRESHOLD=0.8
 
 ```bash
 # Quick start - analyze current directory
-python run.py
+ai-doc-agent
 
 # Analyze specific directory
-python run.py --directory /path/to/project
+ai-doc-agent --directory /path/to/project
 
 # Generate HTML output
-python run.py --format html
+ai-doc-agent --format html
 
 # Specify output filename
-python run.py --output my_project_docs
+ai-doc-agent --output my_project_docs
 
 # Verbose logging
-python run.py --verbose
+ai-doc-agent --verbose
 ```
 
 ### Advanced Commands
@@ -247,7 +257,7 @@ python run.py --verbose
 # Maximum quality documentation
 python src/ai_agent.py \
   --directory ~/my-app \
-  --iterations 5 \
+  --max-iterations 5 \
   --max-files 100 \
   --model codellama \
   --format pdf \
@@ -255,20 +265,20 @@ python src/ai_agent.py \
   --verbose
 
 # Quick documentation for small project
-python run.py \
+ai-doc-agent \
   --max-files 15 \
-  --iterations 2 \
+  --max-iterations 2 \
   --output quick_docs
 
 # Backend API documentation
-python run.py \
+ai-doc-agent \
   --directory ./api-server \
   --project-type backend \
   --model codellama \
   --max-files 50
 
 # Frontend component documentation
-python run.py \
+ai-doc-agent \
   --directory ./src/components \
   --project-type frontend \
   --format html
@@ -284,7 +294,7 @@ python run.py \
 | `--output` | string | Output filename (no extension) | Auto-generated |
 | `--max-files` | int | Maximum files to analyze | 30 |
 | `--project-type` | choice | frontend/backend/mixed | Auto-detect |
-| `--iterations` | int | Max refinement iterations | 3 |
+| `--max-iterations` | int | Max refinement iterations | 3 |
 | `--verbose` | flag | Enable debug logging | False |
 
 ## Features
@@ -348,19 +358,19 @@ Iteration 3: High-quality draft
 
 **Markdown**
 ```bash
-python run.py --format markdown
+ai-doc-agent --format markdown
 # Clean, readable, GitHub-ready
 ```
 
 **HTML**
 ```bash
-python run.py --format html
+ai-doc-agent --format html
 # Styled, professional, browser-ready
 ```
 
 **PDF**
 ```bash
-python run.py --format pdf
+ai-doc-agent --format pdf
 # Requires wkhtmltopdf
 # Professional, printable
 ```
@@ -494,7 +504,7 @@ jobs:
       - name: Generate Docs
         run: |
           pip install -r config/requirements.txt
-          python run.py --output docs/API
+          ai-doc-agent --output docs/API
 ```
 
 ## API Reference
@@ -572,7 +582,7 @@ cat .env | grep OLLAMA_API_URL
 API_TIMEOUT=600
 
 # Or reduce files
-python run.py --max-files 20
+ai-doc-agent --max-files 20
 
 # Or use faster model
 MODEL_NAME=llama2:7b
@@ -583,10 +593,10 @@ MODEL_NAME=llama2:7b
 **Solutions:**
 ```bash
 # Check directory path
-python run.py --directory /absolute/path/to/project
+ai-doc-agent --directory /absolute/path/to/project
 
 # Use verbose mode
-python run.py --verbose
+ai-doc-agent --verbose
 
 # Check if files are in ignored directories
 # Edit IGNORED_DIRECTORIES in src/doc_generator.py
@@ -597,16 +607,16 @@ python run.py --verbose
 **Solutions:**
 ```bash
 # Increase iterations
-python run.py --iterations 5
+ai-doc-agent --max-iterations 5
 
 # Use better model
-python run.py --model codellama
+ai-doc-agent --model codellama
 
 # Analyze more files
-python run.py --max-files 100
+ai-doc-agent --max-files 100
 
 # Manually specify project type
-python run.py --project-type backend
+ai-doc-agent --project-type backend
 ```
 
 #### Issue: "PDF generation failed"
@@ -619,7 +629,7 @@ python run.py --project-type backend
 # Linux: sudo apt-get install wkhtmltopdf
 
 # Or use markdown/html instead
-python run.py --format markdown
+ai-doc-agent --format markdown
 ```
 
 ## Best Practices
@@ -650,7 +660,7 @@ python run.py --format markdown
 
 1. **Start Small**
    ```bash
-   python run.py --max-files 20 --iterations 2
+   ai-doc-agent --max-files 20 --max-iterations 2
    ```
 
 2. **Use Fast Models**
@@ -681,13 +691,13 @@ python run.py --format markdown
 2. **Automation**
    ```bash
    # Add to pre-commit hook
-   python run.py --output docs/API
+   ai-doc-agent --output docs/API
    ```
 
 3. **Quality Checks**
    ```bash
    # Always use verbose mode first
-   python run.py --verbose
+   ai-doc-agent --verbose
    
    # Review ai_agent.log
    tail -f ai_agent.log

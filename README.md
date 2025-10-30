@@ -37,7 +37,7 @@ ai-doc-agent --directory ./examples
 ```
 
 That's all – you now have a **Markdown** documentation file generated in the current working directory.
-Replace the flags in step 3 to change `--output-format`, `--max-files`, `--max-iterations`, etc. (see **Usage** section for the full CLI reference).
+Replace the flags in step 3 to change `--format`, `--max-files`, `--iterations`, etc. (see **Usage** section for the full CLI reference).
 
 ## 📁 Project Structure
 
@@ -87,10 +87,10 @@ ai-doc-agent --directory <path> [options]
 | Flag | Description | Default |
 |------|-------------|---------|
 | `--directory` | Path to the codebase root (required). | – |
-| `--output-format` | `markdown` | `html` | `pdf`. | `markdown` |
+| `--format` | `markdown` | `html` | `pdf`. | `markdown` |
 | `--project-type` | `frontend` | `backend` | `mixed`. Auto‑detect if omitted. | auto |
 | `--max-files` | Upper bound on files to analyse. | `100` |
-| `--max-iterations` | Maximum critique‑refine cycles. | `3` |
+| `--iterations` | Maximum critique‑refine cycles. | `3` |
 | `--log-level` | Overrides `LOG_LEVEL` for this run. | inherits env |
 | `--no-cache` | Disables `ResponseCache` for the current execution. | `False` |
 | `--output-dir` | Directory where the final documentation file will be placed. | Current working directory |
@@ -103,10 +103,10 @@ ai-doc-agent --directory <path> [options]
 # limit processing to 50 files, run a maximum of 2 refinement iterations.
 ai-doc-agent \
   --directory ./my-service \
-  --output-format html \
+  --format html \
   --project-type backend \
     --max-files 50 \
-    --max-iterations 2
+    --iterations 2
 ```
 
 The command performs the following steps automatically:
@@ -224,7 +224,7 @@ docker run --rm -v "$(pwd)/my-project:/src/project" \\
     -e OLLAMA_API_URL=http://host.docker.internal:11434/api/generate \\
     ai-doc-agent:latest \\
     --directory /src/project \\
-    --output-format pdf
+    --format pdf
 ```
 
 All OS‑level dependencies (`wkhtmltopdf`) are baked into the image, so the container works out‑of‑the‑box.
@@ -457,7 +457,7 @@ wkhtmltopdf --version
 **Poor quality output:**
 ```bash
 # Increase refinement iterations
-ai-doc-agent --directory ./project --max-iterations 5
+ai-doc-agent --directory ./project --iterations 5
 
 # Use a better model
 ai-doc-agent --directory ./project --model codellama

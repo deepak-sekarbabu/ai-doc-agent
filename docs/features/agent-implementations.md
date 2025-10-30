@@ -1,16 +1,17 @@
 # Agent Implementations Comparison
 
-The AI Documentation Agent provides two different implementations for generating documentation: the original [AIAgent](src/ai_agent.py#L174-L443) ([ai_agent.py](src/ai_agent.py)) and the LangGraph-based agent ([langgraph_agent.py](src/langgraph_agent.py)). Both follow the same core concept of iterative self-refinement but use different architectural approaches.
+The AI Documentation Agent v2.0.0 provides two different implementations for generating documentation with semantic analysis: the original AIAgent (`src/ai_agent.py`) and the LangGraph-based agent (`src/langgraph_agent.py`). Both include semantic code analysis and follow the same core concept of iterative self-refinement but use different architectural approaches.
 
 ## Overview
 
-Both agents implement the same documentation generation workflow:
+Both agents implement the same documentation generation workflow with semantic analysis:
 1. **Analyze** the codebase to find and read relevant files
-2. **Generate** an initial documentation draft
-3. **Critique** the documentation using AI
-4. **Refine** the documentation based on the critique
-5. Repeat steps 3-4 until quality threshold is met or maximum iterations reached
-6. **Save** the final documentation
+2. **Perform semantic analysis** to understand code relationships and architecture
+3. **Generate** an initial documentation draft enhanced with semantic insights
+4. **Critique** the documentation using AI with semantic understanding
+5. **Refine** the documentation based on the critique
+6. Repeat steps 4-5 until quality threshold is met or maximum iterations reached
+7. **Save** the final documentation
 
 However, they differ significantly in their implementation approaches.
 
@@ -20,8 +21,9 @@ The original implementation uses a traditional procedural approach with manual l
 
 ### Architecture
 - **Approach**: Traditional procedural code with explicit loop control
-- **Control Flow**: Manual management of the iteration cycle in the [run()](src/ai_agent.py#L247-L294) method
+- **Control Flow**: Manual management of the iteration cycle in the `run()` method
 - **Dependencies**: Standard Python without additional workflow libraries
+- **Semantic Analysis**: Integrated semantic code analysis for enhanced documentation
 
 ### Workflow Control
 - Uses a `for` loop to manage iterations
@@ -30,10 +32,10 @@ The original implementation uses a traditional procedural approach with manual l
 
 ### State Management
 - Stores state in class instance variables:
-  - [file_contents](src/base_agent.py#L122-L122)
-  - [documentation](src/base_agent.py#L127-L127)
-  - [critique](src/base_agent.py#L128-L128)
-  - [iteration](src/ai_agent.py#L177-L177)
+  - `file_contents`
+  - `documentation`
+  - `critique`
+  - `iteration`
 
 ### Execution Pattern
 - Linear execution flow
@@ -42,7 +44,7 @@ The original implementation uses a traditional procedural approach with manual l
 
 ### Example Usage
 ```bash
-python src/ai_agent.py --directory ./my-project --iterations 3
+python src/ai_agent.py --directory ./my-project --max-iterations 3
 ```
 
 ## LangGraphAgent (langgraph_agent.py)
@@ -53,18 +55,20 @@ The LangGraph-based implementation uses a state machine approach with a defined 
 - **Approach**: State machine using LangGraph library
 - **Control Flow**: Declarative graph definition where the framework manages execution flow
 - **Dependencies**: Depends on the LangGraph library for workflow management
+- **Semantic Analysis**: Dedicated semantic analysis node in the workflow graph
 
 ### Workflow Control
 - Defines nodes for each step in the process:
-  - [analyze_codebase](src/langgraph_agent.py#L83-L106)
-  - [generate_draft](src/langgraph_agent.py#L108-L119)
-  - [critique_document](src/langgraph_agent.py#L121-L132)
-  - [refine_document](src/langgraph_agent.py#L134-L146)
+- `analyze_codebase`
+- `perform_semantic_analysis`
+- `generate_draft`
+- `critique_document`
+- `refine_document`
 - Defines edges for transitions between nodes
-- Uses conditional logic ([should_continue](src/langgraph_agent.py#L149-L165)) to determine workflow path
+- Uses conditional logic to determine workflow path
 
 ### State Management
-- Uses a typed state dictionary ([AgentState](src/langgraph_agent.py#L46-L62)) that gets passed between nodes
+- Uses a typed state dictionary (`AgentState`) that gets passed between nodes
 - State is explicitly defined and managed by LangGraph
 - Each node receives the current state and returns updates
 
@@ -75,12 +79,12 @@ The LangGraph-based implementation uses a state machine approach with a defined 
 
 ### Example Usage
 ```bash
-python src/langgraph_agent.py --directory ./my-project --iterations 3
+python src/langgraph_agent.py --directory ./my-project --max-iterations 3
 ```
 
 ## Key Differences
 
-| Aspect | AIAgent ([ai_agent.py](src/ai_agent.py)) | LangGraphAgent ([langgraph_agent.py](src/langgraph_agent.py)) |
+| Aspect | AIAgent (`src/ai_agent.py`) | LangGraphAgent (`src/langgraph_agent.py`) |
 |--------|---------------------------|----------------------------------|
 | **Architecture** | Procedural with manual loop control | State machine with graph-based workflow |
 | **Control Flow** | Explicit loop and conditionals | Declarative graph definition |
@@ -122,7 +126,7 @@ The choice between them is primarily architectural rather than feature-based.
 ## Future Development
 
 Going forward, both implementations will be maintained:
-- [ai_agent.py](src/ai_agent.py) serves as the reference implementation and is easier to understand
-- [langgraph_agent.py](src/langgraph_agent.py) provides more advanced workflow capabilities and extensibility
+- `src/ai_agent.py` serves as the reference implementation and is easier to understand
+- `src/langgraph_agent.py` provides more advanced workflow capabilities and extensibility
 
 New features will be implemented in both versions to maintain compatibility.
