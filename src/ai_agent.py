@@ -13,6 +13,7 @@ Best Practices Implemented:
 - Comprehensive error handling
 - Progress tracking and reporting
 - Modular, testable design
+- Semantic critique analysis with cross-validation
 """
 
 import os
@@ -24,17 +25,45 @@ import hashlib
 import json
 from pathlib import Path
 from typing import List, Dict, Optional, Union
+try:
+    from .utils.semantic_critique import ValidationIssue
+except ImportError:
+    from utils.semantic_critique import ValidationIssue
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dotenv import load_dotenv
 
-from .doc_generator import (
-    DocGeneratorError,
-    save_documentation,
-    generate_documentation
-)
-from .utils.file_utils import find_code_files, read_file_safe, detect_project_type
-from .utils.api_utils import call_ollama_api, get_ollama_headers, OLLAMA_API_URL, MODEL_NAME, API_TIMEOUT
-from .base_agent import BaseAgent, AgentConfig, DocumentationTemplates
+try:
+    from .doc_generator import (
+        DocGeneratorError,
+        save_documentation,
+        generate_documentation
+    )
+    from .utils.file_utils import find_code_files, read_file_safe, detect_project_type
+    from .utils.api_utils import call_ollama_api, get_ollama_headers, OLLAMA_API_URL, MODEL_NAME, API_TIMEOUT
+    from .utils.semantic_critique import (
+        SemanticCritiqueAnalyzer,
+        DocumentationValidator,
+        create_semantic_critique_score,
+        ValidationResult
+    )
+    from .base_agent import BaseAgent, AgentConfig, DocumentationTemplates
+    from .utils.api_utils import ResponseCache
+except ImportError:
+    from doc_generator import (
+        DocGeneratorError,
+        save_documentation,
+        generate_documentation
+    )
+    from utils.file_utils import find_code_files, read_file_safe, detect_project_type
+    from utils.api_utils import call_ollama_api, get_ollama_headers, OLLAMA_API_URL, MODEL_NAME, API_TIMEOUT
+    from utils.semantic_critique import (
+        SemanticCritiqueAnalyzer,
+        DocumentationValidator,
+        create_semantic_critique_score,
+        ValidationResult
+    )
+    from base_agent import BaseAgent, AgentConfig, DocumentationTemplates
+    from utils.api_utils import ResponseCache
 
 load_dotenv()
 
@@ -47,94 +76,6 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger(__name__)
-
-
-class ResponseCache:
-    """Simple file-based cache for API responses."""
-
-    def __init__(self, cache_dir: str = ".cache", max_age_hours: int = 24, max_entries: int = 100):
-        self.cache_dir = Path(cache_dir)
-        self.cache_dir.mkdir(exist_ok=True)
-        self.max_age_hours = max_age_hours
-        self.max_entries = max_entries
-
-    def _get_cache_key(self, prompt: str, model: str) -> str:
-        """Generate cache key from prompt and model."""
-        content = f"{model}:{prompt}"
-        return hashlib.md5(content.encode('utf-8')).hexdigest()
-
-    def _get_cache_path(self, cache_key: str) -> Path:
-        """Get cache file path for a key."""
-        return self.cache_dir / f"{cache_key}.json"
-
-    def _clean_expired_entries(self):
-        """Remove expired cache entries and enforce max entries limit."""
-        try:
-            cache_files = list(self.cache_dir.glob("*.json"))
-            if len(cache_files) > self.max_entries:
-                # Sort by modification time, keep newest
-                cache_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
-                for old_file in cache_files[self.max_entries:]:
-                    old_file.unlink()
-
-            # Remove expired entries
-            current_time = time.time()
-            max_age_seconds = self.max_age_hours * 3600
-
-            for cache_file in cache_files:
-                if current_time - cache_file.stat().st_mtime > max_age_seconds:
-                    cache_file.unlink()
-        except Exception as e:
-            logger.warning(f"Cache cleanup failed: {e}")
-
-    def get(self, prompt: str, model: str) -> Optional[str]:
-        """Get cached response for a prompt and model."""
-        if not self.cache_dir.exists():
-            return None
-
-        cache_key = self._get_cache_key(prompt, model)
-        cache_path = self._get_cache_path(cache_key)
-
-        try:
-            if cache_path.exists():
-                with open(cache_path, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                    return data.get('response')
-        except Exception as e:
-            logger.warning(f"Cache read failed: {e}")
-
-        return None
-
-    def set(self, prompt: str, model: str, response: str):
-        """Cache a response for a prompt and model."""
-        try:
-            self._clean_expired_entries()
-
-            cache_key = self._get_cache_key(prompt, model)
-            cache_path = self._get_cache_path(cache_key)
-
-            data = {
-                'prompt': prompt[:200],  # Store truncated prompt for debugging
-                'model': model,
-                'response': response,
-                'timestamp': time.time()
-            }
-
-            with open(cache_path, 'w', encoding='utf-8') as f:
-                json.dump(data, f, ensure_ascii=False, indent=2)
-
-        except Exception as e:
-            logger.warning(f"Cache write failed: {e}")
-
-    def clear(self):
-        """Clear all cached entries."""
-        try:
-            for cache_file in self.cache_dir.glob("*.json"):
-                cache_file.unlink()
-        except Exception as e:
-            logger.warning(f"Cache clear failed: {e}")
-
-
 
 
 class AIAgent(BaseAgent):
@@ -169,6 +110,11 @@ class AIAgent(BaseAgent):
             max_age_hours=self.config.cache_max_age_hours,
             max_entries=self.config.cache_max_entries
         ) if self.config.enable_caching else None
+        
+        # Initialize semantic critique analyzer and validator
+        self.semantic_analyzer = SemanticCritiqueAnalyzer()
+        self.documentation_validator = None  # Will be set after code analysis
+        
         self.iteration_metrics: List[Dict[str, Union[int, float]]] = []
 
     def run(self, max_iterations: int = 3) -> int:
@@ -275,6 +221,9 @@ class AIAgent(BaseAgent):
         if not self.file_contents:
             raise DocGeneratorError("No files could be read successfully.")
 
+        # Initialize documentation validator with analyzed files
+        self.documentation_validator = DocumentationValidator(self.file_contents)
+
         logger.info(f"Successfully read {len(self.file_contents)} files")
 
     def generate_documentation_draft(self) -> str:
@@ -293,16 +242,91 @@ class AIAgent(BaseAgent):
 
     def critique_documentation(self, documentation: str) -> str:
         """
-        Use the LLM to critique the documentation.
+        Use the LLM to critique the documentation with semantic understanding.
+
+        This method generates a critique using the LLM and then performs
+        semantic analysis and cross-validation to provide comprehensive feedback.
 
         Args:
             documentation: Documentation to critique
 
         Returns:
-            Critique text
+            Enhanced critique text with semantic analysis and validation results
         """
+        # Generate initial critique from LLM
         prompt = DocumentationTemplates.CRITIQUE_PROMPT.format(documentation=documentation)
-        return self._call_ollama_with_retry(prompt, operation="critique")
+        initial_critique = self._call_ollama_with_retry(prompt, operation="critique")
+        
+        # Perform semantic analysis of the critique
+        semantic_score = self.semantic_analyzer.analyze_critique_semantically(initial_critique)
+        
+        # Cross-validate documentation against code
+        validation_issues = []
+        if self.documentation_validator:
+            validation_issues = self.documentation_validator.validate_documentation(documentation)
+        
+        # Generate enhanced critique with validation results
+        enhanced_critique = self._enhance_critique_with_validation(
+            initial_critique,
+            semantic_score,
+            validation_issues
+        )
+        
+        return enhanced_critique
+
+    def _enhance_critique_with_validation(self, initial_critique: str,
+                                        semantic_score,
+                                        validation_issues: List) -> str:
+        """
+        Enhance the initial critique with semantic analysis and validation results.
+        
+        Args:
+            initial_critique: Original critique from LLM
+            semantic_score: Semantic analysis results
+            validation_issues: Validation issues found
+            
+        Returns:
+            Enhanced critique with validation insights
+        """
+        critique_lines = [initial_critique.strip()]
+        
+        # Add semantic analysis insights
+        critique_lines.append(f"\n## Semantic Analysis")
+        critique_lines.append(f"- Overall Quality Score: {semantic_score.overall_score:.2f}/1.00")
+        critique_lines.append(f"- Technical Accuracy: {semantic_score.technical_accuracy:.2f}")
+        critique_lines.append(f"- Completeness: {semantic_score.completeness:.2f}")
+        critique_lines.append(f"- Clarity: {semantic_score.clarity:.2f}")
+        critique_lines.append(f"- Structure: {semantic_score.structure:.2f}")
+        critique_lines.append(f"- Usefulness: {semantic_score.usefulness:.2f}")
+        critique_lines.append(f"- Confidence: {semantic_score.confidence:.2f}")
+        
+        # Add validation results
+        if validation_issues:
+            critique_lines.append(f"\n## Cross-Validation Results")
+            
+            errors = [issue for issue in validation_issues if issue.severity == ValidationResult.ERROR]
+            warnings = [issue for issue in validation_issues if issue.severity == ValidationResult.WARNING]
+            
+            if errors:
+                critique_lines.append(f"\n### Critical Issues ({len(errors)}):")
+                for issue in errors[:5]:  # Show up to 5 critical issues
+                    critique_lines.append(f"- **{issue.issue_type}**: {issue.description}")
+                    critique_lines.append(f"  → {issue.suggested_fix}")
+                    if issue.location:
+                        critique_lines.append(f"  → Location: {issue.location}")
+            
+            if warnings:
+                critique_lines.append(f"\n### Warnings ({len(warnings)}):")
+                for issue in warnings[:5]:  # Show up to 5 warnings
+                    critique_lines.append(f"- **{issue.issue_type}**: {issue.description}")
+                    critique_lines.append(f"  → {issue.suggested_fix}")
+                    if issue.location:
+                        critique_lines.append(f"  → Location: {issue.location}")
+        else:
+            critique_lines.append(f"\n## Cross-Validation Results")
+            critique_lines.append("✅ No validation issues found - documentation aligns well with code structure")
+        
+        return "\n".join(critique_lines)
 
     def refine_documentation(self, documentation: str, critique: str) -> str:
         """
@@ -330,21 +354,19 @@ class AIAgent(BaseAgent):
 
     def is_critique_positive(self, critique: str) -> bool:
         """
-        Check if the critique indicates documentation is satisfactory.
+        Check if the critique indicates documentation is satisfactory using semantic analysis.
 
-        Uses a scoring system to analyze critique content:
-        - Positive indicators increase score
-        - Negative indicators decrease score
-        - Length and specificity affect final decision
+        Uses semantic understanding and cross-validation to assess critique quality:
+        - Analyzes critique content semantically rather than using keyword matching
+        - Cross-validates documentation against actual code functionality
+        - Combines semantic score with validation issues for final determination
 
         Args:
             critique: Critique text
 
         Returns:
-            True if critique is positive (score >= threshold)
+            True if critique is positive based on semantic analysis and validation
         """
-        critique_lower = critique.lower().strip()
-
         # Early exit for explicit positive statements
         explicit_positive = [
             "excellent and requires no changes",
@@ -356,54 +378,37 @@ class AIAgent(BaseAgent):
             "satisfactory as is"
         ]
 
+        critique_lower = critique.lower().strip()
         if any(phrase in critique_lower for phrase in explicit_positive):
             return True
 
-        # Scoring system
-        score = 0
-
-        # Positive indicators (add points)
-        positive_words = [
-            "excellent", "perfect", "outstanding", "comprehensive", "well-written",
-            "clear", "concise", "accurate", "complete", "thorough", "professional",
-            "satisfactory", "good", "great", "fantastic"
-        ]
-
-        # Negative indicators (subtract points)
-        negative_words = [
-            "needs improvement", "requires changes", "missing", "incomplete", "unclear",
-            "confusing", "inaccurate", "poor", "lacks", "insufficient", "inadequate",
-            "problematic", "issues", "errors", "deficient"
-        ]
-
-        # Count positive and negative words
-        positive_count = sum(1 for word in positive_words if word in critique_lower)
-        negative_count = sum(1 for word in negative_words if word in critique_lower)
-
-        score += positive_count * 2
-        score -= negative_count * 3
-
-        # Length analysis - very short critiques are often positive
-        if len(critique.strip()) < 50:
-            score += 2
-
-        # Check for specific improvement requests
-        improvement_phrases = [
-            "should add", "consider adding", "recommend adding",
-            "needs to include", "missing section", "add section",
-            "improve", "enhance", "fix", "correct"
-        ]
-
-        improvement_requests = sum(1 for phrase in improvement_phrases if phrase in critique_lower)
-        score -= improvement_requests * 2
-
-        # Threshold for positive critique
-        threshold = self.config.critique_threshold * 10  # Convert to score scale
-
-        return score >= threshold
+        # Use semantic analysis instead of keyword matching
+        semantic_score = self.semantic_analyzer.analyze_critique_semantically(critique)
+        
+        # Cross-validate documentation if we have it
+        validation_issues = []
+        if self.documentation and self.documentation_validator:
+            validation_issues = self.documentation_validator.validate_documentation(self.documentation)
+        
+        # Combine semantic analysis with validation results
+        final_score = create_semantic_critique_score(semantic_score, validation_issues)
+        
+        # Log analysis details for debugging
+        logger.debug(f"Semantic score breakdown: {semantic_score}")
+        logger.debug(f"Validation issues found: {len(validation_issues)}")
+        logger.debug(f"Final score: {final_score:.3f} (threshold: {self.config.critique_threshold})")
+        
+        # Consider critique positive if score meets threshold and no critical errors
+        critical_errors = [issue for issue in validation_issues
+                          if issue.severity == ValidationResult.ERROR]
+        
+        return final_score >= self.config.critique_threshold and len(critical_errors) == 0
 
     def save_documentation(self) -> str:
         """Save the final documentation to file."""
+        if self.documentation is None:
+            raise DocGeneratorError("No documentation to save")
+        
         return save_documentation(
             self.documentation,
             self.output_format,
@@ -433,7 +438,7 @@ class AIAgent(BaseAgent):
             retry_delay=self.config.retry_delay,
             api_timeout=self.config.api_timeout,
             use_cache=self.config.enable_caching,
-            cache=self.cache
+            cache=self.cache if self.cache else None
         )
 
     def _log_completion_metrics(self, output_path: str, total_time: float):
@@ -441,7 +446,10 @@ class AIAgent(BaseAgent):
         logger.info("="*60)
         logger.info("Documentation Generation Complete!")
         logger.info(f"Output file: {output_path}")
-        logger.info(f"Documentation size: {len(self.documentation):,} characters")
+        
+        if self.documentation:
+            logger.info(f"Documentation size: {len(self.documentation):,} characters")
+        
         logger.info(f"Total time: {total_time:.2f}s")
         logger.info(f"Files analyzed: {len(self.file_contents)}")
         logger.info(f"Iterations: {len(self.iteration_metrics)}")

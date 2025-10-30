@@ -19,10 +19,16 @@ from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
 
-from .base_agent import DocumentationTemplates  # noqa: E402
-from .utils.file_utils import find_code_files, read_file_safe, detect_project_type, MAX_CONTENT_PREVIEW  # noqa: E402
-from .utils.text_utils import extract_docstrings, extract_jsdoc, clean_markdown_response  # noqa: E402
-from .utils.api_utils import call_ollama_api, get_ollama_headers, OLLAMA_API_URL, MODEL_NAME, API_TIMEOUT  # noqa: E402
+try:
+    from .base_agent import DocumentationTemplates  # noqa: E402
+    from .utils.file_utils import find_code_files, read_file_safe, detect_project_type, MAX_CONTENT_PREVIEW  # noqa: E402
+    from .utils.text_utils import extract_docstrings, extract_jsdoc, clean_markdown_response  # noqa: E402
+    from .utils.api_utils import ResponseCache, call_ollama_api, get_ollama_headers, OLLAMA_API_URL, MODEL_NAME, API_TIMEOUT  # noqa: E402
+except ImportError:
+    from base_agent import DocumentationTemplates  # noqa: E402
+    from utils.file_utils import find_code_files, read_file_safe, detect_project_type, MAX_CONTENT_PREVIEW  # noqa: E402
+    from utils.text_utils import extract_docstrings, extract_jsdoc, clean_markdown_response  # noqa: E402
+    from utils.api_utils import ResponseCache, call_ollama_api, get_ollama_headers, OLLAMA_API_URL, MODEL_NAME, API_TIMEOUT  # noqa: E402
 
 load_dotenv()
 
@@ -110,8 +116,6 @@ def generate_documentation(
     logger.debug(f"Prompt: {len(prompt)} chars (~{len(prompt) // 4} tokens)")
     
     # Use the utility function for API calls with caching
-    from .utils.api_utils import ResponseCache, call_ollama_api
-    from .utils.text_utils import clean_markdown_response
     cache = ResponseCache()  # Use default settings or load from config
     doc = call_ollama_api(
         prompt=prompt,
