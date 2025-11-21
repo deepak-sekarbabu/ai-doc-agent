@@ -6,8 +6,6 @@ Complete guide to using the AI Documentation Agent v2.0.0 with semantic analysis
 
 The AI Agent (`src/langgraph_agent.py`) is the default implementation of the documentation agent, built using LangGraph. It performs semantic code analysis and uses an iterative critique-refine cycle to generate high-quality documentation that improves with each iteration.
 
-> **Note**: This guide covers the LangGraph-based implementation with semantic analysis. The project also includes an [original AIAgent implementation](../features/agent-implementations.md) with similar functionality.
-
 ## How It Works
 
 The AI Agent follows a sophisticated workflow, which is implemented as a stateful graph using LangGraph:
@@ -46,18 +44,21 @@ The agent performs deep analysis of your codebase before generating documentatio
 The agent doesn't settle for the first draft:
 
 **Iteration 1:**
+
 ```
 Draft → "Basic project structure documented"
 Critique → "Missing deployment section, unclear component relationships"
 ```
 
 **Iteration 2:**
+
 ```
 Refined → "Added deployment guide, clarified architecture"
 Critique → "Good improvement, but examples needed"
 ```
 
 **Iteration 3:**
+
 ```
 Refined → "Added code examples and usage patterns"
 Critique → "Excellent quality, comprehensive coverage"
@@ -80,6 +81,7 @@ The agent evaluates its own work against quality criteria:
 Prioritizes important files based on project type:
 
 **Frontend Projects:**
+
 ```
 Priority 1: package.json, index.html, App.tsx
 Priority 2: vite.config.ts, webpack.config.js
@@ -87,6 +89,7 @@ Priority 3: Component files, utilities
 ```
 
 **Backend Projects:**
+
 ```
 Priority 1: pom.xml, requirements.txt, go.mod
 Priority 2: application.properties, config files
@@ -107,8 +110,6 @@ ai-doc-agent --directory ~/my-project
 # Custom output name
 ai-doc-agent --directory ~/my-app --output my_documentation
 ```
-
-
 
 ### Command-Line Options
 
@@ -193,7 +194,7 @@ ai-doc-agent --project-type mixed
 ai-doc-agent --verbose
 
 # Check logs
-tail -f ai_agent.log
+tail -f langgraph_agent.log
 ```
 
 ## Configuration
@@ -297,6 +298,7 @@ Each iteration consists of:
 3. **Decision** - Accept or continue refining
 
 **Console Output:**
+
 ```
 INFO - Iteration 1/3 - Generating documentation...
 INFO - Iteration 1/3 - Critiquing documentation...
@@ -313,6 +315,7 @@ INFO - Documentation accepted.
 ### File Selection
 
 **Discovery Process:**
+
 1. Scan directory recursively
 2. Filter supported file types
 3. Exclude ignored directories
@@ -321,6 +324,7 @@ INFO - Documentation accepted.
 6. Limit to `max-files`
 
 **Priority Scoring:**
+
 ```
 High Priority (analyzed first):
   - package.json, requirements.txt, pom.xml
@@ -360,6 +364,7 @@ ENABLE_CACHING=true
 ```
 
 **Benefits:**
+
 - Faster subsequent runs
 - Reduced API calls
 - Lower costs
@@ -398,11 +403,13 @@ The agent handles errors gracefully:
 ### Poor Quality Output
 
 **Symptoms:**
+
 - Documentation lacks detail
 - Missing sections
 - Unclear explanations
 
 **Solutions:**
+
 ```bash
 # Increase iterations
 python run.py --iterations 5
@@ -420,10 +427,12 @@ python run.py --project-type backend
 ### Slow Performance
 
 **Symptoms:**
+
 - Takes too long to complete
 - Frequent timeouts
 
 **Solutions:**
+
 ```bash
 # Reduce files
 python run.py --max-files 20
@@ -441,11 +450,13 @@ API_TIMEOUT=600
 ### API Errors
 
 **Symptoms:**
+
 - Connection refused
 - Timeout errors
 - Model not found
 
 **Solutions:**
+
 ```bash
 # Ensure Ollama is running
 ollama serve
@@ -463,10 +474,12 @@ cat .env | grep OLLAMA_API_URL
 ### File Discovery Issues
 
 **Symptoms:**
+
 - No files found
 - Important files skipped
 
 **Solutions:**
+
 ```bash
 # Use verbose mode
 python run.py --verbose
@@ -509,7 +522,7 @@ Evaluate the output, then adjust settings.
 python run.py --verbose
 
 # Watch logs in real-time
-tail -f ai_agent.log
+tail -f langgraph_agent.log
 ```
 
 ### 5. Specify Project Type
@@ -523,6 +536,7 @@ python run.py --project-type backend
 ## Performance Tips
 
 ### For Speed
+
 ```bash
 python run.py \
   --model llama2:7b \
@@ -531,6 +545,7 @@ python run.py \
 ```
 
 ### For Quality
+
 ```bash
 python run.py \
   --model codellama \
@@ -539,6 +554,7 @@ python run.py \
 ```
 
 ### For Balance
+
 ```bash
 python run.py \
   --model mistral \

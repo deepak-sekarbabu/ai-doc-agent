@@ -22,6 +22,7 @@ Check this first:
 #### Issue: Python Not Found
 
 **Symptom:**
+
 ```
 'python' is not recognized as an internal or external command
 ```
@@ -29,6 +30,7 @@ Check this first:
 **Solutions:**
 
 **Windows:**
+
 ```bash
 # Reinstall Python with "Add to PATH" checked
 # Or add Python to PATH manually
@@ -36,6 +38,7 @@ setx PATH "%PATH%;C:\Python311;C:\Python311\Scripts"
 ```
 
 **Linux/macOS:**
+
 ```bash
 # Use python3
 python3 -m venv .venv
@@ -53,6 +56,7 @@ source ~/.bashrc
 #### Issue: Module Not Found
 
 **Symptom:**
+
 ```
 ModuleNotFoundError: No module named 'requests'
 ```
@@ -71,6 +75,7 @@ pip list | grep requests
 ```
 
 **Still not working?**
+
 ```bash
 # Use pip3
 pip3 install -r config/requirements.txt
@@ -89,6 +94,7 @@ which python  # Should point to venv if activated
 #### Issue: Cannot Connect to Ollama
 
 **Symptom:**
+
 ```
 ERROR - Cannot connect to Ollama API
 ConnectionError: [Errno 111] Connection refused
@@ -97,6 +103,7 @@ ConnectionError: [Errno 111] Connection refused
 **Solutions:**
 
 **1. Check if Ollama is running:**
+
 ```bash
 # Test Ollama
 ollama list
@@ -109,6 +116,7 @@ ollama serve
 ```
 
 **2. Verify API URL:**
+
 ```bash
 # Check .env file
 cat .env | grep OLLAMA_API_URL
@@ -121,6 +129,7 @@ curl http://localhost:11434/api/tags
 ```
 
 **3. Check firewall:**
+
 ```bash
 # Ensure port 11434 is not blocked
 netstat -an | grep 11434
@@ -134,6 +143,7 @@ telnet localhost 11434
 #### Issue: Model Not Found
 
 **Symptom:**
+
 ```
 ERROR - Model 'llama2:7b' not found
 ```
@@ -155,6 +165,7 @@ MODEL_NAME=llama2:7b
 ```
 
 **Common models:**
+
 ```bash
 ollama pull llama2:7b      # Fast, general
 ollama pull mistral        # Balanced
@@ -169,6 +180,7 @@ ollama pull llama2:13b     # High quality
 #### Issue: Request Timeout
 
 **Symptom:**
+
 ```
 ERROR - API request timeout after 300 seconds
 ReadTimeout: HTTPSConnectionPool
@@ -177,6 +189,7 @@ ReadTimeout: HTTPSConnectionPool
 **Solutions:**
 
 **1. Increase timeout:**
+
 ```bash
 # Edit .env
 API_TIMEOUT=600  # 10 minutes
@@ -186,11 +199,13 @@ API_TIMEOUT=900  # 15 minutes
 ```
 
 **2. Reduce file count:**
+
 ```bash
 ai-doc-agent --max-files 20
 ```
 
 **3. Use faster model:**
+
 ```bash
 # In .env
 MODEL_NAME=llama2:7b  # Faster than llama2:13b
@@ -200,6 +215,7 @@ ai-doc-agent --model llama2:7b
 ```
 
 **4. Reduce iterations:**
+
 ```bash
 ai-doc-agent --max-iterations 2
 ```
@@ -211,6 +227,7 @@ ai-doc-agent --max-iterations 2
 #### Issue: No Files Found
 
 **Symptom:**
+
 ```
 WARNING - No files found in directory
 INFO - Found 0 files to analyze
@@ -219,6 +236,7 @@ INFO - Found 0 files to analyze
 **Solutions:**
 
 **1. Check directory path:**
+
 ```bash
 # Use absolute path
 ai-doc-agent --directory /absolute/path/to/project
@@ -231,6 +249,7 @@ ls /path/to/project
 ```
 
 **2. Check file types:**
+
 ```bash
 # List files in directory
 ls -la my-project/
@@ -245,6 +264,7 @@ find my-project -name "*.py" -o -name "*.js"
 ```
 
 **3. Check ignored directories:**
+
 ```python
 # Edit src/doc_generator.py if needed
 IGNORED_DIRECTORIES = frozenset([
@@ -255,6 +275,7 @@ IGNORED_DIRECTORIES = frozenset([
 ```
 
 **4. Use verbose mode:**
+
 ```bash
 ai-doc-agent --directory ./project --verbose
 # Will show file discovery process
@@ -267,6 +288,7 @@ ai-doc-agent --directory ./project --verbose
 #### Issue: Permission Denied
 
 **Symptom:**
+
 ```
 PermissionError: [Errno 13] Permission denied: '/path/to/file'
 ```
@@ -274,6 +296,7 @@ PermissionError: [Errno 13] Permission denied: '/path/to/file'
 **Solutions:**
 
 **Linux/macOS:**
+
 ```bash
 # Check permissions
 ls -la /path/to/project
@@ -286,6 +309,7 @@ sudo ai-doc-agent --directory /path/to/project
 ```
 
 **Windows:**
+
 ```bash
 # Run as Administrator
 # Right-click Command Prompt → "Run as administrator"
@@ -301,6 +325,7 @@ sudo ai-doc-agent --directory /path/to/project
 #### Issue: Output File Not Created
 
 **Symptom:**
+
 ```
 INFO - Documentation generated
 # But file doesn't exist
@@ -309,6 +334,7 @@ INFO - Documentation generated
 **Solutions:**
 
 **1. Check output directory:**
+
 ```bash
 # Default location
 ls output/
@@ -321,18 +347,20 @@ ls -la output/
 ```
 
 **2. Specify output name:**
+
 ```bash
 ai-doc-agent --output my_docs
 # Creates: output/my_docs.md
 ```
 
 **3. Check for errors:**
+
 ```bash
 # Run with verbose
 ai-doc-agent --verbose
 
 # Check logs
-cat ai_agent.log
+cat langgraph_agent.log
 ```
 
 ---
@@ -340,6 +368,7 @@ cat ai_agent.log
 #### Issue: PDF Generation Fails
 
 **Symptom:**
+
 ```
 ERROR - PDF generation failed
 OSError: No wkhtmltopdf executable found
@@ -350,6 +379,7 @@ OSError: No wkhtmltopdf executable found
 **1. Install wkhtmltopdf:**
 
 **Windows:**
+
 ```bash
 # Using Chocolatey
 choco install wkhtmltopdf
@@ -359,22 +389,26 @@ choco install wkhtmltopdf
 ```
 
 **macOS:**
+
 ```bash
 brew install wkhtmltopdf
 ```
 
 **Linux:**
+
 ```bash
 sudo apt-get update
 sudo apt-get install wkhtmltopdf
 ```
 
 **2. Verify installation:**
+
 ```bash
 wkhtmltopdf --version
 ```
 
 **3. Use alternative format:**
+
 ```bash
 # Use HTML instead
 ai-doc-agent --format html
@@ -390,6 +424,7 @@ wkhtmltopdf output/docs.html output/docs.pdf
 #### Issue: Poor Documentation Quality
 
 **Symptom:**
+
 - Documentation lacks detail
 - Missing sections
 - Unclear explanations
@@ -398,11 +433,13 @@ wkhtmltopdf output/docs.html output/docs.pdf
 **Solutions:**
 
 **1. Increase iterations:**
+
 ```bash
 ai-doc-agent --max-iterations 5  # Default is 3
 ```
 
 **2. Use better model:**
+
 ```bash
 ai-doc-agent --model codellama  # Better for code
 
@@ -411,17 +448,20 @@ MODEL_NAME=codellama
 ```
 
 **3. Analyze more files:**
+
 ```bash
 ai-doc-agent --max-files 100  # Default is 30
 ```
 
 **4. Specify project type:**
+
 ```bash
 ai-doc-agent --project-type backend
 # More accurate than auto-detection
 ```
 
 **5. Lower quality threshold (faster but lower quality):**
+
 ```bash
 # In .env
 CRITIQUE_THRESHOLD=0.7  # Default is 0.8
@@ -432,6 +472,7 @@ CRITIQUE_THRESHOLD=0.7  # Default is 0.8
 #### Issue: Documentation is Incomplete
 
 **Symptom:**
+
 - Missing deployment section
 - No examples
 - Incomplete API documentation
@@ -439,26 +480,30 @@ CRITIQUE_THRESHOLD=0.7  # Default is 0.8
 **Solutions:**
 
 **1. More iterations:**
+
 ```bash
 ai-doc-agent --max-iterations 7
 ```
 
 **2. Increase timeout:**
+
 ```bash
 # In .env
 API_TIMEOUT=900
 ```
 
 **3. Check critique logs:**
+
 ```bash
 # Run with verbose
 ai-doc-agent --verbose
 
 # Look for critique feedback
-grep "Critique:" ai_agent.log
+grep "Critique:" langgraph_agent.log
 ```
 
 **4. Ensure important files are analyzed:**
+
 ```bash
 # Check if README is included
 ai-doc-agent --verbose | grep README
@@ -474,27 +519,32 @@ ai-doc-agent --max-files 75
 #### Issue: Generation is Very Slow
 
 **Symptom:**
+
 - Takes > 15 minutes
 - Each iteration takes very long
 
 **Solutions:**
 
 **1. Use faster model:**
+
 ```bash
 MODEL_NAME=llama2:7b  # Faster than llama2:13b
 ```
 
 **2. Reduce file count:**
+
 ```bash
 ai-doc-agent --max-files 20
 ```
 
 **3. Reduce iterations:**
+
 ```bash
 ai-doc-agent --max-iterations 2
 ```
 
 **4. Check system resources:**
+
 ```bash
 # CPU usage
 top  # Linux/macOS
@@ -505,6 +555,7 @@ ollama ps
 ```
 
 **5. Close other applications:**
+
 - LLMs need significant RAM and CPU
 - Close browsers, IDEs, etc.
 
@@ -515,12 +566,14 @@ ollama ps
 #### Issue: Environment Variables Not Loading
 
 **Symptom:**
+
 - Settings in .env are ignored
 - Using default values
 
 **Solutions:**
 
 **1. Check .env location:**
+
 ```bash
 # Must be in project root
 ls -la .env
@@ -530,6 +583,7 @@ ls -la .env
 ```
 
 **2. Check .env syntax:**
+
 ```bash
 # Correct format (no spaces around =)
 OLLAMA_API_URL=http://localhost:11434/api/generate
@@ -540,6 +594,7 @@ OLLAMA_API_URL = http://localhost:11434/api/generate  # No spaces!
 ```
 
 **3. Check for quotes:**
+
 ```bash
 # Don't use quotes unless needed
 API_TIMEOUT=300  # Correct
@@ -547,6 +602,7 @@ API_TIMEOUT="300"  # Wrong (will be string)
 ```
 
 **4. Verify loading:**
+
 ```python
 # Test in Python
 from dotenv import load_dotenv
@@ -564,6 +620,7 @@ print(os.getenv('MODEL_NAME'))
 #### Issue: Docker Container Can't Connect to Ollama
 
 **Symptom:**
+
 ```
 ERROR - Connection refused to Ollama
 ```
@@ -571,6 +628,7 @@ ERROR - Connection refused to Ollama
 **Solutions:**
 
 **Windows/macOS:**
+
 ```bash
 # Use host.docker.internal
 docker run --rm \
@@ -580,6 +638,7 @@ docker run --rm \
 ```
 
 **Linux:**
+
 ```bash
 # Use host network
 docker run --rm --network host \
@@ -592,6 +651,7 @@ docker run --rm --network host \
 #### Issue: Volume Mount Issues
 
 **Symptom:**
+
 - Files not accessible in container
 - Permission denied
 
@@ -634,30 +694,30 @@ docker run -v "$(pwd):/workspace" ...
 ai-doc-agent --verbose
 
 # Check logs
-tail -f ai_agent.log
+tail -f langgraph_agent.log
 
 # Search for errors
-grep ERROR ai_agent.log
+grep ERROR langgraph_agent.log
 
 # Search for warnings
-grep WARNING ai_agent.log
+grep WARNING langgraph_agent.log
 ```
 
 ### Log File Analysis
 
 ```bash
 # View full log
-cat ai_agent.log
+cat langgraph_agent.log
 
 # Last 50 lines
-tail -50 ai_agent.log
+tail -50 langgraph_agent.log
 
 # Follow in real-time
-tail -f ai_agent.log
+tail -f langgraph_agent.log
 
 # Search for specific issue
-grep "timeout" ai_agent.log
-grep "connection" ai_agent.log
+grep "timeout" langgraph_agent.log
+grep "connection" langgraph_agent.log
 ```
 
 ---
@@ -685,8 +745,10 @@ When asking for help, include:
 
 **Error:**
 ```
+
 ERROR - Connection refused to Ollama API
 ConnectionError: [Errno 111]
+
 ```
 
 **Command:**
@@ -695,19 +757,22 @@ ai-doc-agent --directory ./my-project --verbose
 ```
 
 **Environment:**
+
 - OS: Ubuntu 22.04
 - Python: 3.11.2
 - Ollama: 0.1.14
 - Model: llama2:7b
 
 **Configuration:**
+
 ```bash
 OLLAMA_API_URL=http://localhost:11434/api/generate
 MODEL_NAME=llama2:7b
 ```
 
 **Logs:**
-[Attach ai_agent.log]
+[Attach langgraph_agent.log]
+
 ```
 
 ---

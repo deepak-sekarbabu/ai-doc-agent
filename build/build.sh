@@ -26,7 +26,7 @@ pip3 install pyinstaller
 
 echo
 echo "[3/4] Building executable..."
-python3 -m PyInstaller build/ai_agent.spec --clean
+python3 -m PyInstaller build/langgraph_agent.spec --clean
 
 echo
 echo "[4/4] Creating distribution package..."

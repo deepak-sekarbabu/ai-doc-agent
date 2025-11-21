@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Unit tests for ai_agent.py module.
-"""
+"""Unit tests for agent_core.py module."""
 
 import os
 import tempfile
@@ -9,7 +7,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
-from src.ai_agent import AIAgent, AgentConfig, ResponseCache
+from src.agent_core import AIAgent, AgentConfig, ResponseCache
 from src.doc_generator import DocGeneratorError
 from src.base_agent import AnalysisError
 
@@ -127,9 +125,9 @@ class Calculator:
         with self.assertRaises((DocGeneratorError, AnalysisError)):
             agent.validate_inputs()
 
-    @patch('src.ai_agent.detect_project_type')
-    @patch('src.ai_agent.find_code_files')
-    @patch('src.ai_agent.read_file_safe')
+    @patch('src.agent_core.detect_project_type')
+    @patch('src.agent_core.find_code_files')
+    @patch('src.agent_core.read_file_safe')
     def test_analyze_codebase_success(self, mock_read, mock_find, mock_detect):
         """Test successful codebase analysis."""
         mock_detect.return_value = "backend"
@@ -152,7 +150,7 @@ class Calculator:
         self.assertEqual(agent.file_contents[0]['path'], 'test.py')
         self.assertEqual(agent.file_contents[0]['content'], 'test content')
 
-    @patch('src.ai_agent.find_code_files')
+    @patch('src.agent_core.find_code_files')
     def test_analyze_codebase_no_files(self, mock_find):
         """Test codebase analysis with no files found."""
         mock_find.return_value = []
@@ -169,7 +167,7 @@ class Calculator:
         with self.assertRaises(DocGeneratorError):
             agent.analyze_codebase()
 
-    @patch('src.ai_agent.generate_documentation')
+    @patch('src.agent_core.generate_documentation')
     def test_generate_documentation_draft(self, mock_generate):
         """Test documentation draft generation."""
         mock_generate.return_value = "# Test Documentation"
@@ -299,7 +297,7 @@ class Calculator:
             result = cache.get("test prompt", "test-model")
             self.assertIsNone(result)
 
-    @patch('src.ai_agent.call_ollama_api')
+    @patch('src.agent_core.call_ollama_api')
     def test_call_ollama_with_retry_success(self, mock_call_api):
         """Test successful API call through the agent."""
         mock_call_api.return_value = "API response"

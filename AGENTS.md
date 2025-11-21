@@ -10,7 +10,7 @@ pip install -e .[dev]
 pytest
 
 # Run single test
-pytest tests/test_ai_agent.py::TestAIAgent::test_agent_config_defaults
+pytest tests/test_agent_core.py::TestAIAgent::test_agent_config_defaults
 
 # Run by marker
 pytest -m unit
@@ -30,7 +30,8 @@ mkdocs serve
 ## Architecture & Codebase Structure
 
 **Python 3.8+** package organized as:
-- `src/` - Main package with agents: `langgraph_agent.py` (LangGraph-based, default), `ai_agent.py` (manual critique loop), `base_agent.py` (base classes)
+
+- `src/` - Main package with agents: `langgraph_agent.py` (LangGraph-based, default), `agent_core.py` (core agent logic), `base_agent.py` (base classes)
 - `src/utils/` - Core modules: `api_utils.py` (Ollama API + ResponseCache), `file_utils.py` (file discovery), `semantic_code_analyzer.py` (dependency graph), `semantic_critique.py` (critique analysis)
 - `tests/` - Unit tests following `test_*.py` pattern
 - `config/` - Requirements and env templates

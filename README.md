@@ -44,7 +44,7 @@ Replace the flags in step 3 to change `--format`, `--max-files`, `--iterations
 ```
 src/
 │   ├── langgraph_agent.py     # LangGraph-based AI agent (default)
-│   ├── ai_agent.py           # Original AI agent with manual critique loop
+│   ├── agent_core.py         # Core agent logic
 │   ├── base_agent.py         # Base agent class
 │   ├── doc_generator.py      # Core documentation utilities
 │   ├── utils/                # Utility functions
@@ -60,7 +60,7 @@ src/
 ├── docs/                     # MkDocs documentation
 ├── build/                  # Build & deployment scripts
 │   ├── build.bat/.sh      # Build executables
-│   ├── ai_agent.spec      # PyInstaller config
+
 │   ├── Dockerfile         # Container definition
 │   └── docker-compose.yml # Docker Compose config
 ├── examples/              # Sample projects for testing
@@ -169,7 +169,7 @@ cd ai-doc-agent
 python -m venv .venv
 source .venv/bin/activate   # Windows: .venv\\Scripts\\activate
 pip install -e .[dev]       # -e -> editable install; registers the `ai-doc-agent` console script
-#   • ai-doc-agent → src/ai_agent.py (main entry)
+#   • ai-doc-agent → src/langgraph_agent.py (main entry)
 #   • doc-generator → src/doc_generator.py
 ```
 
@@ -178,7 +178,7 @@ The `setup.py` entry‑point definition:
 ```python
 entry_points={
     "console_scripts": [
-        "ai-doc-agent=ai_agent:main",
+        "ai-doc-agent=langgraph_agent:main",
         "doc-generator=doc_generator:main",
     ],
 },
@@ -400,10 +400,10 @@ pytest --cov=src --cov-fail-under=85
 
 ## 🔒 Security Considerations
 
-* **Data confidentiality** – By default the agent sends code snippets to the *local* Ollama server (`OLLAMA_MODE=local`). If you switch to a cloud endpoint, be aware that proprietary code will be transmitted to an external service.
-* **Environment secret handling** – Keep `.env` files out of version control (`gitignore` includes `.env`).
-* **Timeouts** – `API_TIMEOUT` (default 300 s) prevents hanging requests that could be exploited for denial‑of‑service.
-* **Least‑privilege execution** – Run the tool in a container or a non‑root user when processing untrusted repositories.
+- **Data confidentiality** – By default the agent sends code snippets to the *local* Ollama server (`OLLAMA_MODE=local`). If you switch to a cloud endpoint, be aware that proprietary code will be transmitted to an external service.
+- **Environment secret handling** – Keep `.env` files out of version control (`gitignore` includes `.env`).
+- **Timeouts** – `API_TIMEOUT` (default 300 s) prevents hanging requests that could be exploited for denial‑of‑service.
+- **Least‑privilege execution** – Run the tool in a container or a non‑root user when processing untrusted repositories.
 
 ## ❓ FAQ & Common Pitfalls
 
@@ -424,13 +424,14 @@ pytest --cov=src --cov-fail-under=85
 2. **Choose Right Model** - Larger = better quality but slower
 3. **Adjust Iterations** - More iterations = better quality but longer
 4. **Specify Type** - Use `--project-type` to skip auto-detection
-5. **Monitor Logs** - Check `ai_agent.log` for insights
+5. **Monitor Logs** - Check `langgraph_agent.log` for insights
 
 ## 🐛 Troubleshooting
 
 ### Common Issues
 
 **Cannot connect to Ollama:**
+
 ```bash
 # For Local Ollama
 ollama serve
@@ -444,6 +445,7 @@ MODEL_NAME=gpt-oss:120b-cloud
 ```
 
 **PDF generation fails:**
+
 ```bash
 # Install wkhtmltopdf (see Requirements section)
 # Ubuntu/Debian: sudo apt-get install wkhtmltopdf
@@ -455,6 +457,7 @@ wkhtmltopdf --version
 ```
 
 **Poor quality output:**
+
 ```bash
 # Increase refinement iterations
 ai-doc-agent --directory ./project --iterations 5
@@ -467,6 +470,7 @@ ai-doc-agent --directory ./project --max-files 50
 ```
 
 **Semantic analysis not working:**
+
 ```bash
 # Check if language is supported (see Requirements)
 # For unsupported languages, only basic analysis is performed
@@ -493,6 +497,7 @@ The organized structure makes it easy:
 ### Code Quality Requirements
 
 All contributions must pass:
+
 - **Tests**: `pytest` with >80% coverage
 - **Linting**: `black` formatting and `flake8` checks
 - **Type Checking**: `mypy` validation
@@ -507,6 +512,7 @@ MIT License - see LICENSE file for details
 ## 🙏 Acknowledgments
 
 Built with:
+
 - [Ollama](https://ollama.ai/) - Local LLM inference
 - [LangChain](https://www.langchain.com/) & [LangGraph](https://langchain-ai.github.io/langgraph/) - AI agent framework
 - [PyInstaller](https://pyinstaller.org/) - Executable bundling
@@ -517,7 +523,7 @@ Built with:
 - 📖 **Documentation**: [Full Docs Site](https://deepak-sekarbabu.github.io/ai-doc-agent/)
 - 🐛 **Issues**: [GitHub Issues](https://github.com/deepak-sekarbabu/ai-doc-agent/issues)
 - 💬 **Discussions**: [GitHub Discussions](https://github.com/deepak-sekarbabu/ai-doc-agent/discussions)
-- 📝 **Troubleshooting**: Check `ai_agent.log` with `--verbose` flag
+- 📝 **Troubleshooting**: Check `langgraph_agent.log` with `--verbose` flag
 - 🔧 **Common Issues**: [Troubleshooting Guide](https://deepak-sekarbabu.github.io/ai-doc-agent/examples/troubleshooting/)
 
 ## 🚦 Status
@@ -531,11 +537,11 @@ Built with:
 ---
 
 **Quick Links:**
-[📖 Documentation](https://deepak-sekarbabu.github.io/ai-doc-agent/) • 
-[🚀 Quick Start](https://deepak-sekarbabu.github.io/ai-doc-agent/getting-started/quickstart/) • 
-[🎁 Deployment](https://deepak-sekarbabu.github.io/ai-doc-agent/deployment/bundling/) • 
-[📁 API Reference](https://deepak-sekarbabu.github.io/ai-doc-agent/reference/api/) • 
-[🧪 Examples](https://deepak-sekarbabu.github.io/ai-doc-agent/examples/samples/) • 
+[📖 Documentation](https://deepak-sekarbabu.github.io/ai-doc-agent/) •
+[🚀 Quick Start](https://deepak-sekarbabu.github.io/ai-doc-agent/getting-started/quickstart/) •
+[🎁 Deployment](https://deepak-sekarbabu.github.io/ai-doc-agent/deployment/bundling/) •
+[📁 API Reference](https://deepak-sekarbabu.github.io/ai-doc-agent/reference/api/) •
+[🧪 Examples](https://deepak-sekarbabu.github.io/ai-doc-agent/examples/samples/) •
 [🐛 Troubleshooting](https://deepak-sekarbabu.github.io/ai-doc-agent/examples/troubleshooting/)
 
 Made with ❤️ using AI-powered development

@@ -8,10 +8,10 @@ This document explains the organized structure of the AI Documentation Agent pro
 ai-doc-agent/
 │
 ├── 📁 src/                          # Source Code
-│   ├── langgraph_agent.py           # LangGraph-based AI agent (default)
-│   ├── ai_agent.py                  # Original AI agent with manual critique loop
-│   ├── base_agent.py                # Base agent class
-│   ├── doc_generator.py             # Core documentation generator
+│   ├── langgraph_agent.py           # Main entry point (LangGraph)
+│   ├── agent_core.py                # Core agent logic
+│   ├── base_agent.py                # Base classes
+│   ├── doc_generator.py             # Documentation generation logic
 │   ├── utils/                       # Utility functions
 │   │   ├── api_utils.py             # Ollama API integration
 │   │   ├── file_utils.py            # File discovery and processing
@@ -61,7 +61,7 @@ ai-doc-agent/
 Contains the core application logic:
 
 - **langgraph_agent.py** - LangGraph-based AI agent (default) with semantic analysis integration
-- **ai_agent.py** - Original AI agent with manual critique-refinement loop and semantic analysis
+- **agent_core.py** - Core agent logic and base classes
 - **base_agent.py** - Base agent class with common functionality
 - **doc_generator.py** - Documentation generation utilities
 - **utils/** - Utility functions including semantic analysis:
@@ -70,7 +70,7 @@ Contains the core application logic:
   - **text_utils.py** - Text processing utilities
   - **semantic_code_analyzer.py** - Code relationship and architecture analysis
   - **semantic_critique.py** - Documentation critique analysis
-- **__init__.py** - Package exports and version info
+- ****init**.py** - Package exports and version info
 
 ### config/ - Configuration
 
@@ -88,7 +88,7 @@ MkDocs documentation site files and configuration.
 Everything needed to build and deploy:
 
 - **build.bat** / **build.sh** - Automated build scripts
-- **ai_agent.spec** - PyInstaller executable configuration
+
 - **Dockerfile** - Container image definition
 - **docker-compose.yml** - Docker orchestration
 
@@ -113,26 +113,31 @@ Default location for generated documentation (gitignored)
 ## Benefits of This Structure
 
 ### ✅ Separation of Concerns
+
 - Source code isolated in `src/`
 - Configuration centralized in `config/`
 - Documentation in `docs/`
 
 ### ✅ Easy Navigation
+
 - Logical grouping of related files
 - Clear purpose for each directory
 - Intuitive file locations
 
 ### ✅ Scalability
+
 - Easy to add new modules in `src/`
 - Simple to add tests in `tests/`
 - Clear place for examples
 
 ### ✅ Distribution Ready
+
 - Clean package structure for pip
 - Build scripts in dedicated directory
 - Proper .gitignore configuration
 
 ### ✅ Maintainability
+
 - Easier to find files
 - Simpler refactoring
 - Better collaboration
@@ -143,7 +148,7 @@ Default location for generated documentation (gitignored)
 
 ```bash
 # Direct execution
-python -m src.ai_agent --directory ./my-project
+python -m src.langgraph_agent --directory ./my-project
 
 # After pip install
 ai-doc-agent --directory ./my-project
@@ -197,7 +202,7 @@ The current structure supports both the original AIAgent implementation and the 
 ```
 OLD LOCATION              →  NEW LOCATION
 ─────────────────────────────────────────────
-ai_agent.py               →  src/ai_agent.py
+agent_core.py           →  src/agent_core.py
 doc_generator.py          →  src/doc_generator.py
 README.md                 →  docs/README.md
 README_DOC_GENERATOR.md   →  docs/README_DOC_GENERATOR.md
@@ -207,9 +212,7 @@ requirements.txt          →  config/requirements.txt
 MANIFEST.in               →  config/MANIFEST.in
 build.bat                 →  build/build.bat
 build.sh                  →  build/build.sh
-ai_agent.spec             →  build/ai_agent.spec
+
 Dockerfile                →  build/Dockerfile
 docker-compose.yml        →  build/docker-compose.yml
 ```
-
-

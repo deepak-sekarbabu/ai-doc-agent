@@ -6,7 +6,7 @@ The AI Documentation Agent follows a standard Python project structure:
 Docgenerator/
 ├── src/                    # Source code
 │   ├── langgraph_agent.py # Main AI agent using LangGraph (default)
-│   ├── ai_agent.py        # Original AI agent with manual critique loop
+│   ├── agent_core.py      # Core agent logic
 │   ├── doc_generator.py   # Core documentation utilities
 │   └── __init__.py        # Package initialization
 ├── config/                 # Configuration files
@@ -26,7 +26,6 @@ Docgenerator/
 │   └── stylesheets/       # Custom CSS
 ├── build/                  # Build & deployment scripts
 │   ├── build.bat/.sh      # Build executables
-│   ├── ai_agent.spec      # PyInstaller config
 │   └── Dockerfile         # Container definition
 ├── examples/              # Sample projects for testing
 ├── tests/                 # Unit tests
@@ -38,13 +37,15 @@ Docgenerator/
 ## Key Directories
 
 ### src/
+
 Contains all the source code for the AI Documentation Agent.
 
 - **langgraph_agent.py**: Main AI agent implementation using LangGraph (default).
-- **ai_agent.py**: Original AI agent implementation with a manual critique-refinement loop.
+- **agent_core.py**: Core agent logic and base classes.
 - **doc_generator.py**: Utilities for file discovery, processing, and documentation generation.
 
 ### config/
+
 Configuration files for the project.
 
 - **.env.example**: Template for environment variables
@@ -52,9 +53,11 @@ Configuration files for the project.
 - **MANIFEST.in**: Package manifest for distribution
 
 ### docs/
+
 Complete documentation for the project, organized by purpose.
 
 ### build/
+
 Build scripts and configuration files for creating distributable packages.
 
 ## File Organization Principles

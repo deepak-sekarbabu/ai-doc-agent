@@ -5,6 +5,7 @@ Unit tests for AI Documentation Agent.
 ## Test Coverage
 
 ### test_doc_generator.py
+
 - [x] Test project type detection (frontend/backend/mixed)
 - [x] Test file discovery and prioritization
 - [x] Test reading files safely
@@ -13,7 +14,8 @@ Unit tests for AI Documentation Agent.
 - [x] Test prompt building
 - [x] Test documentation saving
 
-### test_ai_agent.py
+### test_agent_core.py
+
 - [x] Test agent configuration
 - [x] Test agent initialization
 - [x] Test input validation
@@ -26,27 +28,32 @@ Unit tests for AI Documentation Agent.
 ## Running Tests
 
 ### Install Test Dependencies
+
 ```bash
 pip install -e .[dev]
 ```
 
 ### Run All Tests
+
 ```bash
 pytest
 ```
 
 ### Run Specific Test File
+
 ```bash
 pytest tests/test_doc_generator.py
-pytest tests/test_ai_agent.py
+pytest tests/test_agent_core.py
 ```
 
 ### Run with Coverage
+
 ```bash
 pytest --cov=src --cov-report=html
 ```
 
 ### Run Specific Test
+
 ```bash
 pytest tests/test_doc_generator.py::TestDocGenerator::test_detect_project_type_frontend -v
 ```

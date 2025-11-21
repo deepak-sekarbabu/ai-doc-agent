@@ -49,6 +49,7 @@ Run: python app.py
 ```
 
 **Critique:**
+
 - ❌ Missing architecture explanation
 - ❌ No deployment instructions
 - ❌ Unclear component relationships
@@ -91,6 +92,7 @@ Helper functions for data validation and formatting.
 ```
 
 **Critique:**
+
 - ✅ Architecture explained
 - ✅ Component purposes clear
 - ⚠️ Still missing deployment guide
@@ -121,9 +123,11 @@ for deployment on cloud platforms or local servers.
 
 ### Component Relationships
 ```
+
 React UI → Flask API → SQLite DB
           ↓
        utils.py (validation)
+
 ```
 
 ## Key Components
@@ -139,12 +143,14 @@ def get_users():
 ```
 
 **Endpoints:**
+
 - `GET /api/users` - List all users
 - `POST /api/users` - Create new user
 - `PUT /api/users/:id` - Update user
 - `DELETE /api/users/:id` - Delete user
 
 ### utils.py - Utility Functions
+
 Data validation and formatting helpers:
 
 ```python
@@ -156,11 +162,13 @@ def validate_email(email):
 ## Development Setup
 
 ### Prerequisites
+
 - Python 3.8+
 - pip
 - Node.js 16+ (for frontend)
 
 ### Installation
+
 ```bash
 # Backend
 pip install -r requirements.txt
@@ -170,6 +178,7 @@ cd frontend && npm install
 ```
 
 ### Running Locally
+
 ```bash
 # Start backend
 python app.py
@@ -181,6 +190,7 @@ cd frontend && npm start
 ## Deployment
 
 ### Production Build
+
 ```bash
 # Build frontend
 cd frontend && npm run build
@@ -193,15 +203,18 @@ gunicorn -w 4 app:app
 ```
 
 ### Cloud Deployment
+
 - **Heroku**: `git push heroku main`
 - **AWS**: Deploy via Elastic Beanstalk
 - **Docker**: `docker build -t myapp .`
 
 ## Best Practices
+
 - Always validate input data
 - Use environment variables for config
 - Enable CORS for production
 - Implement proper error handling
+
 ```
 
 **Critique:**
@@ -223,14 +236,18 @@ No human intervention needed - the agent identifies and fixes its own mistakes.
 
 **Before Refinement:**
 ```
+
 "This file handles users."
+
 ```
 
 **After Refinement:**
 ```
+
 "UserController manages user authentication, profile updates,
 and session management. Implements JWT-based authentication
 with Redis session storage. See example usage below..."
+
 ```
 
 ### 2. Comprehensive Coverage
@@ -260,6 +277,7 @@ CRITIQUE_THRESHOLD=0.8  # Accepts docs scoring >= 80%
 ```
 
 **Quality criteria:**
+
 - Completeness (all sections present)
 - Clarity (easy to understand)
 - Accuracy (technically correct)
@@ -314,6 +332,7 @@ python run.py --iterations 1
 ### Fast Strategy (2 iterations)
 
 **Best for:**
+
 - Quick documentation needs
 - Small projects
 - Initial drafts
@@ -331,6 +350,7 @@ python run.py --iterations 2 --max-files 20
 ### Balanced Strategy (3 iterations)
 
 **Best for:**
+
 - Most projects
 - Standard quality needs
 - Production documentation
@@ -348,6 +368,7 @@ python run.py --iterations 3
 ### High-Quality Strategy (5 iterations)
 
 **Best for:**
+
 - Critical documentation
 - Complex projects
 - Client deliverables
@@ -365,6 +386,7 @@ python run.py --iterations 5 --max-files 100
 ### Maximum Quality Strategy (7-10 iterations)
 
 **Best for:**
+
 - Mission-critical docs
 - Large enterprise projects
 - API documentation
@@ -388,6 +410,7 @@ python run.py --verbose
 ```
 
 **Output:**
+
 ```
 INFO - Iteration 1/3 - Generating initial documentation...
 INFO - Iteration 1/3 - Critiquing documentation...
@@ -407,14 +430,14 @@ INFO - Documentation accepted!
 
 ### Log Files
 
-Detailed refinement tracking in `ai_agent.log`:
+Detailed refinement tracking in `langgraph_agent.log`:
 
 ```
-2025-01-26 10:15:23 - ai_agent - INFO - Starting refinement cycle
-2025-01-26 10:15:45 - ai_agent - DEBUG - Iteration 1 critique score: 0.65
-2025-01-26 10:16:12 - ai_agent - DEBUG - Iteration 2 critique score: 0.78
-2025-01-26 10:16:38 - ai_agent - DEBUG - Iteration 3 critique score: 0.89
-2025-01-26 10:16:38 - ai_agent - INFO - Quality threshold met, accepting
+2025-01-26 10:15:23 - langgraph_agent - INFO - Starting refinement cycle
+2025-01-26 10:15:45 - langgraph_agent - DEBUG - Iteration 1 critique score: 0.65
+2025-01-26 10:16:12 - langgraph_agent - DEBUG - Iteration 2 critique score: 0.78
+2025-01-26 10:16:38 - langgraph_agent - DEBUG - Iteration 3 critique score: 0.89
+2025-01-26 10:16:38 - langgraph_agent - INFO - Quality threshold met, accepting
 ```
 
 ## Performance Considerations
@@ -434,16 +457,19 @@ Detailed refinement tracking in `ai_agent.log`:
 Each iteration makes API calls:
 
 **Typical API calls per iteration:**
+
 - 1 generation/refinement call
 - 1 critique call
 - Total: 2 calls per iteration
 
 **Example:**
+
 - 3 iterations = ~6 API calls
 - 5 iterations = ~10 API calls
 - 10 iterations = ~20 API calls
 
 **Optimization tips:**
+
 ```bash
 # Use local Ollama to avoid API costs
 OLLAMA_API_URL=http://localhost:11434/api/generate
@@ -511,12 +537,14 @@ python run.py \
 **Symptom:** Quality score never reaches threshold
 
 **Causes:**
+
 - Insufficient file context
 - Model not powerful enough
 - Threshold too high
 - Complex codebase
 
 **Solutions:**
+
 ```bash
 # Increase files for more context
 python run.py --max-files 75
@@ -536,6 +564,7 @@ python run.py --iterations 7
 **Symptom:** Each iteration takes very long
 
 **Solutions:**
+
 ```bash
 # Use faster model
 python run.py --model llama2:7b
@@ -552,6 +581,7 @@ python run.py --max-files 20
 **Symptom:** Later iterations show little improvement
 
 **Solutions:**
+
 ```bash
 # Reduce max iterations
 python run.py --iterations 3
@@ -593,12 +623,14 @@ python run.py --iterations 3
 ### Quality Difference Example
 
 **Without refinement:**
+
 ```
 ## Authentication
 The app has authentication. Uses JWT tokens.
 ```
 
 **With refinement:**
+
 ```
 ## Authentication System
 
@@ -630,12 +662,14 @@ def login():
 ```
 
 ### Security Features
+
 - Bcrypt password hashing
 - Token rotation every 15 minutes
 - Redis-based session invalidation
 - Rate limiting: 5 attempts per minute
 
 ### Usage Example
+
 ```javascript
 const response = await fetch('/auth/login', {
     method: 'POST',
@@ -643,6 +677,7 @@ const response = await fetch('/auth/login', {
     body: JSON.stringify({email, password})
 });
 ```
+
 ```
 
 ## Next Steps

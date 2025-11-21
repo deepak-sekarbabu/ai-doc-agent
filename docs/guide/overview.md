@@ -149,21 +149,23 @@ python src/langgraph_agent.py --directory ./my-project --iterations 5
 ```
 
 **Architecture:**
+
 - Uses LangGraph for state machine-based workflow
 - Declarative graph definition
 - Automatic state management
 
 ### Implementation 2: Original AIAgent
 
-**File:** `src/ai_agent.py`
+**File:** `src/langgraph_agent.py`
 
 The original implementation with manual loop control:
 
 ```bash
-python src/ai_agent.py --directory ./my-project --iterations 5
+python src/langgraph_agent.py --directory ./my-project --iterations 5
 ```
 
 **Architecture:**
+
 - Traditional procedural approach
 - Manual loop control
 - Class-based state management
@@ -181,12 +183,14 @@ python src/doc_generator.py ./my-project
 ```
 
 **Features:**
+
 - ✅ Fast generation
 - ✅ Single pass
 - ✅ Basic documentation
 - ⚠️ No refinement
 
 **When to use:**
+
 - Quick documentation needs
 - Simple projects
 - Time-constrained situations
@@ -253,12 +257,14 @@ Specialized for API documentation.
 Generated documentation includes:
 
 ### 1. Project Overview
+
 - High-level description
 - Primary technologies used
 - Target audience
 - Key use cases
 
 ### 2. Architecture and Design
+
 - Overall system architecture
 - Component structure
 - Design patterns used
@@ -266,7 +272,9 @@ Generated documentation includes:
 - State management approach
 
 ### 3. Key Components and Modules
+
 For each major component:
+
 - Purpose and functionality
 - Key features
 - Dependencies
@@ -274,19 +282,23 @@ For each major component:
 - Usage examples
 
 ### 4. Development Setup
+
 - Prerequisites
 - Installation steps
 - Environment configuration
 - Available scripts/commands
 
 ### 5. Deployment Guide
+
 - Build process
 - Deployment options
 - Hosting considerations
 - Environment variables
 
 ### 6. File Documentation
+
 For each analyzed file:
+
 - File path and purpose
 - Functions and methods
 - Classes and interfaces
@@ -294,6 +306,7 @@ For each analyzed file:
 - Usage examples
 
 ### 7. Best Practices
+
 - Coding standards
 - Performance considerations
 - Accessibility features

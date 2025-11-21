@@ -15,7 +15,7 @@ AI Documentation Agent is a powerful tool that uses iterative AI refinement to c
 
 <div class="grid cards" markdown>
 
--   :material-reload:{ .lg .middle } __Iterative Refinement__
+- :material-reload:{ .lg .middle } __Iterative Refinement__
 
     ---
 
@@ -23,7 +23,7 @@ AI Documentation Agent is a powerful tool that uses iterative AI refinement to c
 
     [:octicons-arrow-right-24: Learn more](features/iterative-refinement.md)
 
--   :material-robot:{ .lg .middle } __AI-Powered__
+- :material-robot:{ .lg .middle } __AI-Powered__
 
     ---
 
@@ -31,7 +31,7 @@ AI Documentation Agent is a powerful tool that uses iterative AI refinement to c
 
     [:octicons-arrow-right-24: Get started](getting-started/quickstart.md)
 
--   :material-file-multiple:{ .lg .middle } __Multi-Format__
+- :material-file-multiple:{ .lg .middle } __Multi-Format__
 
     ---
 
@@ -39,7 +39,7 @@ AI Documentation Agent is a powerful tool that uses iterative AI refinement to c
 
     [:octicons-arrow-right-24: Output formats](features/output-formats.md)
 
--   :material-brain:{ .lg .middle } __Smart Detection__
+- :material-brain:{ .lg .middle } __Smart Detection__
 
     ---
 
@@ -47,7 +47,7 @@ AI Documentation Agent is a powerful tool that uses iterative AI refinement to c
 
     [:octicons-arrow-right-24: Project detection](features/project-detection.md)
 
--   :material-graph:{ .lg .middle } __Semantic Analysis__
+- :material-graph:{ .lg .middle } __Semantic Analysis__
 
     ---
 
@@ -118,7 +118,7 @@ docker build -t ai-doc-agent:latest .
 
 ```bash
 pip install pyinstaller
-    pyinstaller --onefile src/ai_agent.py --name ai-doc-agent
+    pyinstaller --onefile src/langgraph_agent.py --name ai-doc-agent
     ./dist/ai-doc-agent --help
     ```
 

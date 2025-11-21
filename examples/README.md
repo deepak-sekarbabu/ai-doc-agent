@@ -13,7 +13,7 @@ This directory contains sample projects for testing the AI Documentation Agent.
 python run.py --directory ./examples --output sample_docs
 
 # Or directly
-python src/ai_agent.py --directory ./examples --max-files 5 --output sample_docs
+python src/langgraph_agent.py --directory ./examples --max-files 5 --output sample_docs
 ```
 
 ## Add Your Own Examples

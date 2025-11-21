@@ -26,7 +26,7 @@ build.bat
 
 # Or manually from project root:
 pip install pyinstaller
-python -m PyInstaller build/ai_agent.spec --clean
+python -m PyInstaller build/langgraph_agent.spec --clean
 ```
 
 **Output**: `dist\ai-doc-agent-bundle\ai-doc-agent.exe`
@@ -41,7 +41,7 @@ chmod +x build.sh
 
 # Or manually from project root:
 pip3 install pyinstaller
-python3 -m PyInstaller build/ai_agent.spec --clean
+python3 -m PyInstaller build/langgraph_agent.spec --clean
 ```
 
 **Output**: `dist/ai-doc-agent-bundle/ai-doc-agent`
@@ -49,6 +49,7 @@ python3 -m PyInstaller build/ai_agent.spec --clean
 ### Distribution
 
 The bundle includes:
+
 - Executable file
 - `.env` configuration file
 - `README.md`
@@ -210,6 +211,7 @@ Simple portable bundle without compilation.
 ### Create Bundle
 
 **Windows:**
+
 ```bash
 # Create bundle directory (from project root)
 mkdir ai-doc-agent-portable
@@ -223,13 +225,14 @@ copy README.md ai-doc-agent-portable\
 
 # Create run script
 echo @echo off > ai-doc-agent-portable\run.bat
-echo python src\ai_agent.py %%* >> ai-doc-agent-portable\run.bat
+echo python src\langgraph_agent.py %%* >> ai-doc-agent-portable\run.bat
 
 # Zip it
 powershell Compress-Archive -Path ai-doc-agent-portable -DestinationPath ai-doc-agent-portable.zip
 ```
 
 **Linux/Mac:**
+
 ```bash
 # Create bundle directory (from project root)
 mkdir -p ai-doc-agent-portable/src
@@ -244,7 +247,7 @@ cp README.md ai-doc-agent-portable/
 cat > ai-doc-agent-portable/run.sh << 'EOF'
 #!/bin/bash
 cd "$(dirname "$0")"
-python3 src/ai_agent.py "$@"
+python3 src/langgraph_agent.py "$@"
 EOF
 chmod +x ai-doc-agent-portable/run.sh
 
@@ -286,22 +289,30 @@ tar -czf ai-doc-agent-portable.tar.gz ai-doc-agent-portable/
 ## Recommended Approach by Use Case
 
 ### For End Users (Non-Developers)
+
 → **PyInstaller Executable**
+
 - No setup required
 - Just download and run
 
 ### For Development Teams
+
 → **Docker Container**
+
 - Consistent environment
 - Easy CI/CD integration
 
 ### For Python Developers
+
 → **pip Package**
+
 - Familiar workflow
 - Easy integration with other tools
 
 ### For Quick Testing/Sharing
+
 → **Zip Bundle**
+
 - Fastest to create
 - Easy to modify
 
@@ -310,16 +321,19 @@ tar -czf ai-doc-agent-portable.tar.gz ai-doc-agent-portable/
 ## Security Considerations
 
 ### PyInstaller
+
 - Executables may be flagged by antivirus
 - Use code signing on Windows
 - Verify checksums when distributing
 
 ### Docker
+
 - Keep base images updated
 - Scan images for vulnerabilities: `docker scan ai-doc-agent`
 - Use minimal base images
 
 ### pip Package
+
 - Use virtual environments
 - Verify package integrity
 - Pin dependency versions
@@ -353,26 +367,30 @@ After creating any bundle, test it:
 ### PyInstaller Issues
 
 **Problem**: Missing modules
+
 ```bash
-# Add to hiddenimports in build/ai_agent.spec
+# Add to hiddenimports in build/langgraph_agent.spec
 hiddenimports=['missing_module']
 ```
 
 **Problem**: Large executable size
+
 ```bash
 # Use one-folder mode instead
-python -m PyInstaller build/ai_agent.spec --onedir
+python -m PyInstaller build/langgraph_agent.spec --onedir
 ```
 
 ### Docker Issues
 
 **Problem**: Cannot connect to host Ollama
+
 ```bash
 # Use host network mode
 docker run --network host ...
 ```
 
 **Problem**: Permission issues
+
 ```bash
 # Run with user permissions
 docker run --user $(id -u):$(id -g) ...
@@ -381,6 +399,7 @@ docker run --user $(id -u):$(id -g) ...
 ### pip Package Issues
 
 **Problem**: Dependencies not installing
+
 ```bash
 # Upgrade pip and setuptools
 pip install --upgrade pip setuptools wheel
@@ -404,7 +423,7 @@ With the new organized structure:
 
 ```
 Docgenerator/
-├── src/              # Source code (ai_agent.py, doc_generator.py)
+├── src/              # Source code (langgraph_agent.py, doc_generator.py)
 ├── config/           # Configuration (.env.example, requirements.txt)
 ├── build/            # Build scripts and configs
 ├── docs/             # Documentation
@@ -420,4 +439,5 @@ All build scripts automatically handle the new structure.
 ---
 
 **Quick Navigation:**
+
 - [Complete Guide](../guide.md)

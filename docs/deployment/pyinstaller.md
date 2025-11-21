@@ -78,12 +78,13 @@ pip install pyinstaller
 
 ```bash
 # From project root
-python -m PyInstaller build/ai_agent.spec --clean
+python -m PyInstaller build/langgraph_agent.spec --clean
 ```
 
 #### 3. Create Distribution Bundle
 
 **Windows:**
+
 ```bash
 # Create bundle directory
 mkdir dist\ai-doc-agent-bundle
@@ -99,6 +100,7 @@ copy README.md dist\ai-doc-agent-bundle\
 ```
 
 **Linux/macOS:**
+
 ```bash
 # Create bundle directory
 mkdir -p dist/ai-doc-agent-bundle
@@ -139,12 +141,12 @@ dist/
 
 ## PyInstaller Spec File
 
-The `ai_agent.spec` file configures the build:
+The `langgraph_agent.spec` file configures the build:
 
 ```python
-# build/ai_agent.spec
+# build/langgraph_agent.spec
 a = Analysis(
-    ['../src/ai_agent.py'],           # Main script
+    ['../src/langgraph_agent.py'],           # Main script
     pathex=['../src'],                # Python path
     binaries=[],                       # Binary dependencies
     datas=[
@@ -233,6 +235,7 @@ powershell Compress-Archive -Path ai-doc-agent-bundle -DestinationPath ai-doc-ag
 #### Windows - Installer (Optional)
 
 Use tools like:
+
 - [Inno Setup](https://jrsoftware.org/isinfo.php)
 - [NSIS](https://nsis.sourceforge.io/)
 - [WiX Toolset](https://wixtoolset.org/)
@@ -334,6 +337,7 @@ cd path/to/ai-doc-agent-bundle
 ### Add to PATH (Optional)
 
 **Windows:**
+
 ```bash
 # Add to PATH environment variable
 setx PATH "%PATH%;C:\path\to\ai-doc-agent-bundle"
@@ -343,6 +347,7 @@ ai-doc-agent --help
 ```
 
 **Linux/macOS:**
+
 ```bash
 # Add to PATH
 echo 'export PATH=$PATH:/path/to/ai-doc-agent-bundle' >> ~/.bashrc
@@ -369,7 +374,7 @@ pyinstaller --version
 #### Missing Modules Error
 
 ```bash
-# Add to hiddenimports in ai_agent.spec
+# Add to hiddenimports in langgraph_agent.spec
 hiddenimports=[
     'requests',
     'dotenv',
@@ -377,7 +382,7 @@ hiddenimports=[
 ],
 
 # Rebuild
-python -m PyInstaller build/ai_agent.spec --clean
+python -m PyInstaller build/langgraph_agent.spec --clean
 ```
 
 #### Import Error During Build
@@ -387,7 +392,7 @@ python -m PyInstaller build/ai_agent.spec --clean
 pip install -r config/requirements.txt
 
 # Clean build
-python -m PyInstaller build/ai_agent.spec --clean
+python -m PyInstaller build/langgraph_agent.spec --clean
 ```
 
 #### Large Executable Size
@@ -397,7 +402,7 @@ python -m PyInstaller build/ai_agent.spec --clean
 upx=True
 
 # Or use one-folder mode (smaller but multiple files)
-python -m PyInstaller build/ai_agent.spec --onedir
+python -m PyInstaller build/langgraph_agent.spec --onedir
 ```
 
 ### Runtime Issues
@@ -405,6 +410,7 @@ python -m PyInstaller build/ai_agent.spec --onedir
 #### Executable Won't Run
 
 **Windows:**
+
 ```bash
 # Run from Command Prompt to see errors
 cmd
@@ -413,6 +419,7 @@ ai-doc-agent.exe --help
 ```
 
 **Linux/macOS:**
+
 ```bash
 # Check permissions
 chmod +x ai-doc-agent
@@ -426,6 +433,7 @@ chmod +x ai-doc-agent
 **Problem:** Antivirus flags executable as malware
 
 **Solutions:**
+
 1. Add exception in antivirus software
 2. Code sign the executable (Windows)
 3. Build on clean system
@@ -434,12 +442,14 @@ chmod +x ai-doc-agent
 #### Missing DLL/Library Error
 
 **Windows:**
+
 ```bash
 # Install Visual C++ Redistributable
 # Download from Microsoft website
 ```
 
 **Linux:**
+
 ```bash
 # Install missing libraries
 sudo apt-get install libpython3.11
@@ -453,6 +463,7 @@ ldd ai-doc-agent
 **Problem:** `.env` file not found
 
 **Solution:**
+
 ```bash
 # Ensure .env is in same directory as executable
 ls .env
@@ -466,17 +477,21 @@ OLLAMA_API_URL=http://localhost:11434/api/generate
 ### One-File vs One-Folder
 
 **One-File (Default):**
+
 ```bash
-python -m PyInstaller build/ai_agent.spec --onefile
+python -m PyInstaller build/langgraph_agent.spec --onefile
 ```
+
 - Single executable
 - Slower startup (extracts to temp)
 - Easier distribution
 
 **One-Folder:**
+
 ```bash
-python -m PyInstaller build/ai_agent.spec --onedir
+python -m PyInstaller build/langgraph_agent.spec --onedir
 ```
+
 - Multiple files in folder
 - Faster startup
 - Larger distribution
@@ -485,7 +500,7 @@ python -m PyInstaller build/ai_agent.spec --onedir
 
 ```bash
 # Build with debug information
-python -m PyInstaller build/ai_agent.spec --debug all
+python -m PyInstaller build/langgraph_agent.spec --debug all
 
 # Run executable to see debug output
 ./ai-doc-agent --verbose
@@ -521,11 +536,13 @@ signtool verify /pa ai-doc-agent.exe
 **Note:** Must build on target platform (Windows exe must be built on Windows)
 
 **Cross-Platform Strategy:**
+
 1. Build on Windows → Windows .exe
 2. Build on Linux → Linux binary
 3. Build on macOS → macOS binary
 
 **Using CI/CD:**
+
 ```yaml
 # GitHub Actions - Build matrix
 strategy:
@@ -537,16 +554,19 @@ runs-on: ${{ matrix.os }}
 ### Platform-Specific Notes
 
 **Windows:**
+
 - Builds to `.exe`
 - May trigger antivirus
 - Consider code signing
 
 **Linux:**
+
 - Builds to binary
 - May need `chmod +x`
 - Check library dependencies
 
 **macOS:**
+
 - Builds to binary
 - May need `chmod +x`
 - Consider notarization for distribution
@@ -583,7 +603,7 @@ ai-doc-agent.exe --directory test-project
 
 ```bash
 # Tag builds with version
-python -m PyInstaller build/ai_agent.spec --clean
+python -m PyInstaller build/langgraph_agent.spec --clean
 
 # Rename output
 mv dist/ai-doc-agent.exe dist/ai-doc-agent-v2.0.0.exe
@@ -592,6 +612,7 @@ mv dist/ai-doc-agent.exe dist/ai-doc-agent-v2.0.0.exe
 ### 3. Provide Clear Instructions
 
 Include `SETUP.txt`:
+
 ```
 AI Documentation Agent - Setup Instructions
 
@@ -614,7 +635,7 @@ AI Documentation Agent - Setup Instructions
 
 ```bash
 # Always clean before final build
-python -m PyInstaller build/ai_agent.spec --clean
+python -m PyInstaller build/langgraph_agent.spec --clean
 
 # Remove old builds
 rm -rf dist/ build/

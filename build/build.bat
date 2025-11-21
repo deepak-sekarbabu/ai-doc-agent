@@ -32,7 +32,7 @@ if %errorlevel% neq 0 (
 
 echo.
 echo [3/4] Building executable...
-python -m PyInstaller build\ai_agent.spec --clean
+python -m PyInstaller build\langgraph_agent.spec --clean
 if %errorlevel% neq 0 (
     echo ERROR: Failed to build executable
     exit /b 1

@@ -49,7 +49,8 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "ai-doc-agent=ai_agent:main",
+
+            "ai-doc-agent=langgraph_agent:main",
             "doc-generator=doc_generator:main",
         ],
     },

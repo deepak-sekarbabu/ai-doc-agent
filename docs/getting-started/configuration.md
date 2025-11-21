@@ -157,6 +157,7 @@ RETRY_DELAY=5
 ```
 
 **Retry Pattern:**
+
 - 1st retry: wait `RETRY_DELAY` seconds
 - 2nd retry: wait `RETRY_DELAY * 2` seconds
 - 3rd retry: wait `RETRY_DELAY * 4` seconds
@@ -206,6 +207,7 @@ CRITIQUE_THRESHOLD=0.7
 ```
 
 **Use with:**
+
 ```bash
 ai-doc-agent --max-files 20 --iterations 2
 ```
@@ -224,6 +226,7 @@ CRITIQUE_THRESHOLD=0.9
 ```
 
 **Use with:**
+
 ```bash
 ai-doc-agent --iterations 5 --max-files 100
 ```
@@ -256,6 +259,7 @@ CRITIQUE_THRESHOLD=0.6
 ```
 
 **Use with:**
+
 ```bash
 ai-doc-agent --max-files 10 --iterations 1
 ```
@@ -321,6 +325,7 @@ cp .env .env.test
 ```
 
 **Use with:**
+
 ```bash
 # Copy desired config before running
 cp .env.prod .env
@@ -376,7 +381,7 @@ API_TIMEOUT=600
 ### Configuration Not Loading
 
 !!! failure "Settings not applied"
-    
+
     **Check:**
     1. `.env` file exists in project root
     2. No syntax errors in `.env`
@@ -393,7 +398,7 @@ API_TIMEOUT=600
 ### Model Not Found
 
 !!! failure "Model 'xxx' not found"
-    
+
     **Solution:**
     ```bash
     # List available models
@@ -409,7 +414,7 @@ API_TIMEOUT=600
 ### Connection Issues
 
 !!! failure "Cannot connect to Ollama"
-    
+
     **Solution:**
     ```bash
     # Check if Ollama is running
@@ -425,7 +430,7 @@ API_TIMEOUT=600
 ### Timeout Issues
 
 !!! failure "Request timeout"
-    
+
     **Solutions:**
     1. Increase timeout: `API_TIMEOUT=600`
     2. Reduce files: `--max-files 20`
@@ -450,7 +455,7 @@ MAX_RETRIES=3
 ai-doc-agent --verbose
 
 # Check logs
-tail -f ai_agent.log
+tail -f langgraph_agent.log
 ```
 
 ### 3. Optimize Based on Results

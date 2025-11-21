@@ -49,7 +49,7 @@ pytest --help
 tests/
 ├── __init__.py
 ├── test_doc_generator.py      # Core functionality tests
-├── test_ai_agent.py            # AI agent tests
+├── test_agent_core.py          # AI agent tests
 ├── test_integration.py         # Integration tests
 ├── test_cli.py                 # Command-line tests
 ├── fixtures/                   # Test fixtures
@@ -277,7 +277,7 @@ def test_agent_workflow(sample_backend_project, mocker):
     mocker.patch('requests.post', return_value=mock_response)
     
     # Create agent
-    from src.ai_agent import AIAgent
+    from src.agent_core import AIAgent
     agent = AIAgent(
         directory=str(sample_backend_project),
         max_files=10,
@@ -494,23 +494,27 @@ def test_documentation_generation():
 Before releasing, manually test:
 
 **Basic Functionality:**
+
 - [ ] `python run.py --help` displays help
 - [ ] Generate docs for sample project
 - [ ] All output formats work (markdown, html, pdf)
 - [ ] Configuration loads from .env
 
 **Different Project Types:**
+
 - [ ] Frontend project (React/Vue)
 - [ ] Backend project (Python/Java)
 - [ ] Mixed project (Full-stack)
 
 **Edge Cases:**
+
 - [ ] Empty directory
 - [ ] Very large project (100+ files)
 - [ ] Project with no supported files
 - [ ] Invalid .env configuration
 
 **Error Handling:**
+
 - [ ] Ollama not running
 - [ ] Invalid directory path
 - [ ] Network timeout
@@ -616,12 +620,14 @@ def test_full_generation_performance(sample_project, mocker):
 ### Tests Failing
 
 **Check test isolation:**
+
 ```bash
 # Run tests in random order
 pytest --random-order
 ```
 
 **Check for side effects:**
+
 ```bash
 # Run single test
 pytest tests/test_file.py::test_name -v

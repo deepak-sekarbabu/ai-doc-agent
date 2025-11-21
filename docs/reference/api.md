@@ -8,20 +8,20 @@ The AI Documentation Agent consists of several key modules:
 
 | Module | Purpose | Entry Point |
 |--------|---------|-------------|
-| `ai_agent` | Original iterative refinement agent with semantic analysis | `src/ai_agent.py` |
+| `agent_core` | Core agent logic and base classes | `src/agent_core.py` |
 | `langgraph_agent` | LangGraph-based agent with semantic analysis | `src/langgraph_agent.py` |
 | `doc_generator` | Core documentation utilities | `src/doc_generator.py` |
 | `semantic_code_analyzer` | Code relationship and architecture analysis | `src/utils/semantic_code_analyzer.py` |
 | `semantic_critique` | Documentation critique and validation | `src/utils/semantic_critique.py` |
 
-## ai_agent Module
+## agent_core Module
 
 ### AgentConfig
 
 Configuration class for the AI Agent.
 
 ```python
-from src.ai_agent import AgentConfig
+from src.agent_core import AgentConfig
 
 config = AgentConfig()
 ```
@@ -54,7 +54,7 @@ print(config)
 Main AI agent class with iterative refinement capability.
 
 ```python
-from src.ai_agent import AIAgent, AgentConfig
+from src.agent_core import AIAgent, AgentConfig
 
 agent = AIAgent(
     directory="/path/to/project",
@@ -93,12 +93,15 @@ exit_code = agent.run(max_iterations=5)
 ```
 
 **Parameters:**
+
 - `max_iterations` (int): Maximum refinement iterations (default: 3)
 
 **Returns:**
+
 - `int`: Exit code (0 = success, 1 = error)
 
 **Process:**
+
 1. Discovers and analyzes code files
 2. Generates initial documentation
 3. Critiques the documentation
@@ -109,7 +112,7 @@ exit_code = agent.run(max_iterations=5)
 ##### Example Usage
 
 ```python
-from src.ai_agent import AIAgent
+from src.agent_core import AIAgent
 
 # Basic usage
 agent = AIAgent(
@@ -120,7 +123,7 @@ agent = AIAgent(
 agent.run(max_iterations=5)
 
 # Advanced usage
-from src.ai_agent import AgentConfig
+from src.agent_core import AgentConfig
 
 config = AgentConfig()
 config.max_retries = 5
@@ -335,9 +338,11 @@ project_type = detect_project_type("/path/to/project")
 ```
 
 **Parameters:**
+
 - `start_path` (str): Root directory to analyze
 
 **Returns:**
+
 - `str`: Project type ("frontend", "backend", or "mixed")
 
 **Example:**
@@ -374,11 +379,13 @@ files = find_code_files(
 ```
 
 **Parameters:**
+
 - `start_path` (str): Root directory to search
 - `max_files` (int, optional): Maximum files to return (default: 50)
 - `project_type` (str, optional): Project type or None for auto-detect
 
 **Returns:**
+
 - `List[str]`: List of file paths, priority files first
 
 **Example:**
@@ -413,9 +420,11 @@ content = read_file_safe("/path/to/file.py")
 ```
 
 **Parameters:**
+
 - `file_path` (str): Path to file
 
 **Returns:**
+
 - `str`: File content or empty string if error
 
 **Example:**
@@ -450,11 +459,13 @@ prompt = build_prompt(
 ```
 
 **Parameters:**
+
 - `file_contents` (List[Dict]): List of file dictionaries
 - `project_type` (str, optional): Project type
 - `output_format` (str, optional): Output format
 
 **Returns:**
+
 - `str`: Formatted prompt for LLM
 
 ---
@@ -479,14 +490,17 @@ docs = generate_documentation(
 ```
 
 **Parameters:**
+
 - `file_contents` (List[Dict]): List of file dictionaries
 - `output_format` (str, optional): Output format (default: "markdown")
 - `project_type` (str, optional): Project type
 
 **Returns:**
+
 - `str`: Generated documentation
 
 **Raises:**
+
 - `OllamaConnectionError`: If cannot connect to Ollama API
 - `DocGeneratorError`: For other generation errors
 
@@ -541,11 +555,13 @@ output_path = save_documentation(
 ```
 
 **Parameters:**
+
 - `content` (str): Documentation content
 - `output_format` (str): Format ("markdown", "html", "pdf")
 - `output_file` (str): Output filename without extension
 
 **Returns:**
+
 - `str`: Full path to saved file
 
 **Example:**
@@ -578,6 +594,7 @@ headers = get_ollama_headers()
 ```
 
 **Returns:**
+
 - `Dict[str, str]`: HTTP headers dictionary
 
 ---
@@ -635,7 +652,7 @@ Both modules respect these environment variables:
 
 ```python
 #!/usr/bin/env python3
-from src.ai_agent import AIAgent, AgentConfig
+from src.agent_core import AIAgent, AgentConfig
 from src.doc_generator import (
     detect_project_type,
     find_code_files,

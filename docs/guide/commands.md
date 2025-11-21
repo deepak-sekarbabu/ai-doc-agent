@@ -10,7 +10,6 @@ The AI Documentation Agent provides three main entry points:
 |---------|---------|------|
 | `ai-doc-agent` | Main console script | AI Agent (semantic + iterative) |
 | `python src/langgraph_agent.py` | LangGraph implementation | AI Agent (semantic + iterative) |
-| `python src/ai_agent.py` | Original implementation | AI Agent (semantic + iterative) |
 | `python src/doc_generator.py` | Simple generator | Single-pass |
 
 ## ai-doc-agent - Main Console Script
@@ -139,71 +138,6 @@ ai-doc-agent \
   --max-files 50
 ```
 
-## ai_agent.py - Original AI Agent Implementation
-
-Direct access to the original AI Agent implementation with semantic analysis and iterative refinement.
-
-### Syntax
-
-```bash
-python src/ai_agent.py [OPTIONS]
-```
-
-### Options
-
-Same as `run.py` plus additional advanced options.
-
-### Examples
-
-#### Maximum Quality Documentation
-
-```bash
-python src/ai_agent.py \
-  --directory ~/important-project \
-  --iterations 5 \
-  --max-files 100 \
-  --model codellama \
-  --format pdf \
-  --output comprehensive_documentation \
-  --verbose
-```
-
-#### Backend API Documentation
-
-```bash
-python src/ai_agent.py \
-  --directory ./api-server \
-  --project-type backend \
-  --model codellama \
-  --max-files 50 \
-  --iterations 4 \
-  --format html \
-  --output api_docs
-```
-
-#### Frontend Component Documentation
-
-```bash
-python src/ai_agent.py \
-  --directory ./component-library \
-  --project-type frontend \
-  --max-files 75 \
-  --iterations 4 \
-  --format html \
-  --output component_docs
-```
-
-#### Quick Testing
-
-```bash
-python src/ai_agent.py \
-  --directory ./test-project \
-  --iterations 1 \
-  --max-files 10 \
-  --model llama2:7b \
-  --verbose
-```
-
 ## doc_generator.py - Simple Generator
 
 Fast, single-pass documentation generation.
@@ -276,6 +210,7 @@ python run.py --directory C:\Projects\MyApp  # Windows
 ```
 
 **Tips:**
+
 - Use absolute paths to avoid ambiguity
 - Ensure the path exists and is readable
 - Directory should contain source code files
@@ -300,6 +235,7 @@ python run.py --model llama2:13b
 ```
 
 **Available Models:**
+
 ```bash
 # List installed models
 ollama list
@@ -309,6 +245,7 @@ ollama pull codellama
 ```
 
 **Model Recommendations:**
+
 - `llama2:7b` - Fast, good for testing (4-8 GB RAM)
 - `mistral` - Balanced quality/speed (8 GB RAM)
 - `codellama` - Best for code docs (8 GB RAM)
@@ -337,18 +274,21 @@ python run.py --format pdf
 **Format Details:**
 
 **Markdown:**
+
 - Clean, readable text format
 - GitHub/GitLab compatible
 - Easy to version control
 - No dependencies
 
 **HTML:**
+
 - Professional styling
 - Browser-ready
 - Includes CSS
 - Good for sharing
 
 **PDF:**
+
 - Professional appearance
 - Printable
 - Requires `wkhtmltopdf` installed
@@ -375,6 +315,7 @@ python run.py --output api_reference --format html
 ```
 
 **Output Location:**
+
 - Files saved to `output/` directory
 - Directory created if doesn't exist
 - Extension added automatically
@@ -406,12 +347,14 @@ python run.py --max-files 200
 ```
 
 **Considerations:**
+
 - More files = better context = higher quality
 - More files = longer processing time
 - More files = higher API costs
 - Timeout may occur with too many files
 
 **Recommendations:**
+
 - Small project (< 20 files): `--max-files 15`
 - Medium project (20-50 files): `--max-files 30`
 - Large project (50-100 files): `--max-files 75`
@@ -441,6 +384,7 @@ python run.py --project-type mixed
 ```
 
 **Why Specify?**
+
 - More accurate file prioritization
 - Better-targeted documentation
 - Faster than auto-detection
@@ -449,16 +393,19 @@ python run.py --project-type mixed
 **Detection Indicators:**
 
 **Frontend:**
+
 - `package.json`, `yarn.lock`
 - `.jsx`, `.tsx`, `.vue`, `.svelte`
 - `webpack.config.js`, `vite.config.ts`
 
 **Backend:**
+
 - `requirements.txt`, `pom.xml`, `go.mod`
 - `.java`, `.py`, `.go` (without frontend files)
 - `application.properties`, `build.gradle`
 
 **Mixed:**
+
 - Both frontend and backend indicators
 
 ### --iterations
@@ -488,18 +435,21 @@ python run.py --iterations 10
 ```
 
 **Iteration Process:**
+
 1. Generate documentation
 2. Critique quality
 3. Refine based on critique
 4. Repeat until quality threshold OR max iterations
 
 **Trade-offs:**
+
 - More iterations = better quality
 - More iterations = longer time
 - More iterations = more API calls
 - Diminishing returns after 5 iterations
 
 **Recommendations:**
+
 - Testing: `--iterations 1`
 - Quick docs: `--iterations 2`
 - Standard: `--iterations 3` (default)
@@ -523,6 +473,7 @@ python run.py --verbose
 ```
 
 **Verbose Output Includes:**
+
 - File discovery process
 - API request details
 - Generation progress
@@ -531,6 +482,7 @@ python run.py --verbose
 - Debug messages
 
 **Use When:**
+
 - Troubleshooting issues
 - Understanding agent behavior
 - Monitoring progress

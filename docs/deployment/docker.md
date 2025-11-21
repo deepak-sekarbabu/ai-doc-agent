@@ -20,6 +20,7 @@ Docker deployment provides an isolated, reproducible environment that works iden
 ### Install Docker
 
 **Windows:**
+
 ```bash
 # Download Docker Desktop
 # https://www.docker.com/products/docker-desktop
@@ -29,6 +30,7 @@ choco install docker-desktop
 ```
 
 **macOS:**
+
 ```bash
 # Download Docker Desktop
 # https://www.docker.com/products/docker-desktop
@@ -38,6 +40,7 @@ brew install --cask docker
 ```
 
 **Linux:**
+
 ```bash
 # Ubuntu/Debian
 curl -fsSL https://get.docker.com -o get-docker.sh
@@ -131,7 +134,7 @@ The Dockerfile performs these steps:
  => [3/7] WORKDIR /app
  => [4/7] COPY config/requirements.txt .
  => [5/7] RUN pip install --no-cache-dir -r requirements.txt
- => [6/7] COPY src/ai_agent.py .
+ => [6/7] COPY src/langgraph_agent.py .
  => [7/7] COPY src/doc_generator.py .
  => exporting to image
 Successfully built ai-doc-agent
@@ -198,6 +201,7 @@ docker run --rm \
 ### Custom Ollama URL
 
 **Local Ollama:**
+
 ```bash
 # Windows/Mac - Use host.docker.internal
 docker run --rm \
@@ -213,6 +217,7 @@ docker run --rm --network host \
 ```
 
 **Remote Ollama:**
+
 ```bash
 docker run --rm \
   -v "$(pwd):/workspace" \
@@ -492,12 +497,14 @@ pipeline {
 **Problem:** Container can't reach Ollama on host
 
 **Solution (Windows/Mac):**
+
 ```bash
 # Use host.docker.internal
 -e OLLAMA_API_URL=http://host.docker.internal:11434/api/generate
 ```
 
 **Solution (Linux):**
+
 ```bash
 # Use host network
 docker run --network host ...
@@ -511,6 +518,7 @@ docker run --network host ...
 **Problem:** Cannot write to mounted volumes
 
 **Solution:**
+
 ```bash
 # Run with user permissions
 docker run --user $(id -u):$(id -g) ...
@@ -524,6 +532,7 @@ chmod -R 777 output/
 **Problem:** Docker image is too large
 
 **Solution:**
+
 ```bash
 # Use multi-stage build
 # Optimize Dockerfile to reduce layers
@@ -538,6 +547,7 @@ docker images ai-doc-agent
 **Problem:** Docker build fails
 
 **Solution:**
+
 ```bash
 # Clean build with no cache
 docker build --no-cache -t ai-doc-agent .

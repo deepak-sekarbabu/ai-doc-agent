@@ -15,7 +15,7 @@ from utils.semantic_critique import (
     ValidationIssue,
     create_semantic_critique_score
 )
-from ai_agent import AIAgent
+from agent_core import AIAgent
 
 
 class TestSemanticCritiqueAnalyzer:

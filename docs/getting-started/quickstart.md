@@ -58,7 +58,7 @@ ollama pull gpt-oss:120b-cloud # Cloud model (requires API key)
 
 ## Your First Documentation
 
-### Generate docs for the sample project:
+### Generate docs for the sample project
 
 ```bash
 ai-doc-agent --directory ./examples --output my_first_docs
@@ -70,7 +70,7 @@ This will:
 2. ✅ Generate comprehensive documentation with AI refinement
 3. ✅ Save to `my_first_docs.md` in the current directory
 
-### Check the output:
+### Check the output
 
 ```bash
 # View the generated documentation
@@ -154,7 +154,7 @@ The generated documentation includes:
 ## Quick Troubleshooting
 
 !!! failure "Cannot connect to Ollama"
-    
+
     **Solution:** Make sure Ollama is running:
     ```bash
     ollama serve
@@ -163,6 +163,7 @@ The generated documentation includes:
 !!! failure "No files found"
 
 **Solution:** Check the directory path:
+
 ```bash
 ai-doc-agent --directory /absolute/path/to/project --verbose
 ```
@@ -170,6 +171,7 @@ ai-doc-agent --directory /absolute/path/to/project --verbose
 !!! failure "API Timeout"
 
 **Solution:** Reduce the number of files or increase timeout:
+
 ```bash
 ai-doc-agent --max-files 20
 # Or edit .env: API_TIMEOUT=600
@@ -221,4 +223,4 @@ Need help?
 - 📖 Check the [Complete Guide](../guide.md)
 - 🔧 Review [Configuration Options](configuration.md)
 - 🐛 Enable verbose mode: `--verbose`
-- 📝 Check logs: `ai_agent.log`
+- 📝 Check logs: `langgraph_agent.log`

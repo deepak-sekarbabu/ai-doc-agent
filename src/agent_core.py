@@ -1,24 +1,14 @@
 #!/usr/bin/env python3
 """
-AI Agent for Code Documentation Generation
+Core AI Agent Logic for Code Documentation Generation
 
-This script defines an AI agent that autonomously generates, critiques, and refines
-documentation for code projects using iterative improvement cycles.
-
-Best Practices Implemented:
-- Structured logging with appropriate levels
-- Configuration management via environment variables
-- Retry logic with exponential backoff
-- Result caching to avoid redundant API calls
-- Comprehensive error handling
-- Progress tracking and reporting
-- Modular, testable design
-- Semantic critique analysis with cross-validation
+This module contains the core AIAgent class which encapsulates the logic for
+analyzing code, generating documentation, and performing critique-refinement cycles.
+It is designed to be used by orchestration layers like LangGraph or other runners.
 """
 
 import os
 import sys
-import argparse
 import logging
 import time
 import hashlib
@@ -75,14 +65,6 @@ except ImportError:
 
 load_dotenv()
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(sys.stdout),
-        logging.FileHandler('ai_agent.log', encoding='utf-8')
-    ]
-)
 logger = logging.getLogger(__name__)
 
 
@@ -131,6 +113,9 @@ class AIAgent(BaseAgent):
     def run(self, max_iterations: int = 3) -> int:
         """
         Main execution loop for the agent.
+        
+        NOTE: This method is deprecated and kept only for compatibility if needed.
+        Prefer using LangGraph or other orchestration for the execution loop.
 
         Args:
             max_iterations: Maximum number of refinement iterations
@@ -439,8 +424,6 @@ class AIAgent(BaseAgent):
         )
         return self._call_ollama_with_retry(prompt, operation="refinement")
 
-
-
     def is_critique_positive(self, critique: str) -> bool:
         """
         Check if the critique indicates documentation is satisfactory using semantic analysis.
@@ -559,90 +542,3 @@ class AIAgent(BaseAgent):
             logger.info("Cache cleared successfully")
         else:
             logger.info("Caching is disabled")
-
-
-def main() -> int:
-    """Main entry point for the AI agent."""
-    # Detect if running as executable or script
-    script_name = os.path.basename(sys.argv[0])
-    if script_name.endswith('.exe'):
-        cmd = 'ai-doc-agent.exe'
-    else:
-        cmd = 'python ai_agent.py'
-    
-    parser = argparse.ArgumentParser(
-        description="AI agent to generate and refine documentation for code projects.",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=f"""
-Examples:
-  {cmd}
-  {cmd} --directory ./my-project --format html
-  {cmd} --max-files 50 --iterations 5
-  {cmd} --model llama2:7b --output my_docs
-        """
-    )
-    
-    parser.add_argument(
-        "--model", 
-        default=MODEL_NAME, 
-        help=f"Ollama model (default: {MODEL_NAME})"
-    )
-    parser.add_argument(
-        "--format", 
-        default="markdown", 
-        choices=["markdown", "html", "pdf"], 
-        help="Output format (default: markdown)"
-    )
-    parser.add_argument(
-        "--output", 
-        help="Output filename (without extension)"
-    )
-    parser.add_argument(
-        "--max-files", 
-        type=int, 
-        default=30, 
-        help="Maximum files to analyze (default: 30)"
-    )
-    parser.add_argument(
-        "--directory", 
-        help="Directory to analyze (default: current directory)"
-    )
-    parser.add_argument(
-        "--project-type", 
-        choices=["frontend", "backend", "mixed"], 
-        help="Project type (default: auto-detect)"
-    )
-    parser.add_argument(
-        "--iterations", 
-        type=int, 
-        default=3, 
-        help="Max refinement iterations (default: 3)"
-    )
-    parser.add_argument(
-        "--verbose", 
-        action="store_true", 
-        help="Enable verbose logging"
-    )
-    
-    args = parser.parse_args()
-    
-    if args.verbose:
-        logging.getLogger().setLevel(logging.DEBUG)
-
-    directory = args.directory or str(Path.cwd())
-
-    # Config is created automatically in AIAgent if not provided
-    agent = AIAgent(
-        directory=directory,
-        max_files=args.max_files,
-        model=args.model,
-        project_type=args.project_type,
-        output_format=args.format,
-        output_file=args.output
-    )
-
-    return agent.run(max_iterations=args.iterations)
-
-
-if __name__ == "__main__":
-    sys.exit(main())

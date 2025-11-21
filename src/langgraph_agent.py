@@ -16,7 +16,7 @@ from langgraph.graph import StateGraph, END
 from dotenv import load_dotenv
 
 from .doc_generator import save_documentation
-from .ai_agent import AIAgent
+from .agent_core import AIAgent
 from .base_agent import AgentConfig
 from .utils.semantic_code_analyzer import SemanticCodeAnalyzer
 

@@ -1,30 +1,13 @@
 # -*- mode: python ; coding: utf-8 -*-
-# PyInstaller spec file for AI Documentation Agent
-
-import os
-import sys
-
-# Add src directory to path
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath('.')), 'src'))
 
 block_cipher = None
 
 a = Analysis(
-    ['../src/ai_agent.py'],
-    pathex=['../src'],
+    ['../src/langgraph_agent.py'],
+    pathex=[],
     binaries=[],
-    datas=[
-        ('../config/.env.example', 'config'),
-        ('../src/doc_generator.py', '.'),
-        ('../src/__init__.py', '.'),
-    ],
-    hiddenimports=[
-        'requests',
-        'dotenv',
-        'markdown',
-        'pdfkit',
-        'doc_generator',
-    ],
+    datas=[],
+    hiddenimports=[],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -34,7 +17,6 @@ a = Analysis(
     cipher=block_cipher,
     noarchive=False,
 )
-
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
 exe = EXE(
@@ -57,5 +39,4 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=None,
 )

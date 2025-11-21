@@ -21,6 +21,7 @@ Comprehensive documentation for the AI Documentation Agent with semantic analysi
 ### What is AI Documentation Agent?
 
 An autonomous AI agent that:
+
 1. Analyzes your codebase with semantic code analysis
 2. Performs deep relationship and architecture analysis
 3. Generates comprehensive documentation enhanced with semantic insights
@@ -251,147 +252,6 @@ ai-doc-agent --output my_project_docs
 ai-doc-agent --verbose
 ```
 
-### Advanced Commands
-
-```bash
-# Maximum quality documentation
-python src/ai_agent.py \
-  --directory ~/my-app \
-  --max-iterations 5 \
-  --max-files 100 \
-  --model codellama \
-  --format pdf \
-  --output comprehensive_docs \
-  --verbose
-
-# Quick documentation for small project
-ai-doc-agent \
-  --max-files 15 \
-  --max-iterations 2 \
-  --output quick_docs
-
-# Backend API documentation
-ai-doc-agent \
-  --directory ./api-server \
-  --project-type backend \
-  --model codellama \
-  --max-files 50
-
-# Frontend component documentation
-ai-doc-agent \
-  --directory ./src/components \
-  --project-type frontend \
-  --format html
-```
-
-### Command Reference
-
-| Option | Type | Description | Default |
-|--------|------|-------------|---------|
-| `--directory` | path | Directory to analyze | Current directory |
-| `--model` | string | Ollama model name | From .env |
-| `--format` | choice | Output format (markdown/html/pdf) | markdown |
-| `--output` | string | Output filename (no extension) | Auto-generated |
-| `--max-files` | int | Maximum files to analyze | 30 |
-| `--project-type` | choice | frontend/backend/mixed | Auto-detect |
-| `--max-iterations` | int | Max refinement iterations | 3 |
-| `--verbose` | flag | Enable debug logging | False |
-
-## Features
-
-### 1. Automatic Project Detection
-
-The agent automatically detects your project type:
-
-**Frontend Indicators:**
-- `package.json`, `yarn.lock`, `pnpm-lock.yaml`
-- React/Vue/Svelte component files
-
-**Backend Indicators:**
-- `pom.xml`, `build.gradle`, `go.mod`, `Cargo.toml`
-- `requirements.txt`, `Gemfile`, `composer.json`
-
-**Mixed Projects:**
-- Contains both frontend and backend indicators
-
-### 2. Intelligent File Prioritization
-
-Priority files are analyzed first for better context:
-
-**Frontend Priority:**
-```
-package.json, index.html, App.tsx/jsx, main.tsx/jsx
-vite.config.ts, webpack.config.js, tailwind.config.ts
-```
-
-**Backend Priority:**
-```
-pom.xml, build.gradle, application.properties
-requirements.txt, go.mod, Cargo.toml, Program.cs
-```
-
-### 3. Iterative Refinement
-
-The agent improves documentation through multiple cycles:
-
-```
-Iteration 1: Generate initial draft
-          ↓
-          Critique: "Missing deployment section"
-          ↓
-          Refine: Add deployment information
-          ↓
-Iteration 2: Improved draft
-          ↓
-          Critique: "Unclear component relationships"
-          ↓
-          Refine: Clarify architecture
-          ↓
-Iteration 3: High-quality draft
-          ↓
-          Critique: "Excellent, no changes needed"
-          ↓
-          Finalize ✓
-```
-
-### 4. Multi-Format Export
-
-**Markdown**
-```bash
-ai-doc-agent --format markdown
-# Clean, readable, GitHub-ready
-```
-
-**HTML**
-```bash
-ai-doc-agent --format html
-# Styled, professional, browser-ready
-```
-
-**PDF**
-```bash
-ai-doc-agent --format pdf
-# Requires wkhtmltopdf
-# Professional, printable
-```
-
-### 5. Comprehensive Logging
-
-All operations are logged:
-
-```bash
-# Console output (INFO level)
-2025-01-26 10:30:45 - ai_agent - INFO - AI Agent activated
-
-# File output (ai_agent.log - all levels)
-2025-01-26 10:30:45 - ai_agent - DEBUG - Reading file: src/main.py
-2025-01-26 10:30:46 - ai_agent - INFO - Found 25 files to analyze
-2025-01-26 10:30:50 - ai_agent - INFO - Iteration 1/3
-```
-
-### 6. Error Handling & Retry Logic
-
-- **Exponential Backoff** - Retries with increasing delays
 - **Graceful Degradation** - Falls back to simpler formats
 - **Detailed Errors** - Clear error messages with solutions
 - **Recovery** - Continues after non-critical errors
@@ -401,12 +261,14 @@ All operations are logged:
 Generated documentation includes these sections:
 
 ### 1. Project Overview
+
 - High-level description
 - Primary technologies
 - Target audience
 - Use cases
 
 ### 2. Architecture and Design
+
 - Overall architecture
 - Component structure
 - Design patterns
@@ -415,31 +277,38 @@ Generated documentation includes these sections:
 - Performance strategies
 
 ### 3. Key Components and Modules
+
 For each component:
+
 - Purpose and functionality
 - Key features
 - Dependencies
 - Implementation details
 
 ### 4. Development Setup
+
 - Prerequisites
 - Installation steps
 - Environment configuration
 - Available scripts
 
 ### 5. Deployment
+
 - Build process
 - Deployment options
 - Hosting considerations
 
 ### 6. File Documentation
+
 For each file:
+
 - File path and purpose
 - Functions/classes/methods
 - Parameters and return values
 - Usage examples
 
 ### 7. Best Practices
+
 - Coding standards
 - Performance considerations
 - Accessibility features
@@ -449,7 +318,7 @@ For each file:
 
 ### Custom Prompts
 
-Edit either `src/ai_agent.py` or `src/langgraph_agent.py` to customize prompts:
+Edit `src/langgraph_agent.py` to customize prompts:
 
 ```python
 def _build_critique_prompt(self, documentation: str) -> str:
@@ -512,7 +381,7 @@ jobs:
 ### AIAgent Class
 
 ```python
-from src.ai_agent import AIAgent, AgentConfig
+from src.agent_core import AIAgent, AgentConfig
 
 # Create configuration
 config = AgentConfig()
@@ -534,7 +403,7 @@ agent = AIAgent(
 exit_code = agent.run(max_iterations=5)
 ```
 
-> **Note**: This documents the original [AIAgent](file:///c:/Projects/ai-doc-agent/src/ai_agent.py#L174-L443) implementation. The project also provides a [LangGraph-based implementation](features/agent-implementations.md).
+> **Note**: This documents the [AIAgent](file:///c:/Projects/ai-doc-agent/src/agent_core.py) implementation. The project also provides a [LangGraph-based implementation](features/agent-implementations.md).
 
 ### Standalone Functions
 
@@ -563,6 +432,7 @@ docs = generate_documentation(file_contents, output_format="markdown")
 #### Issue: "Cannot connect to Ollama"
 
 **Solution:**
+
 ```bash
 # 1. Start Ollama
 ollama serve
@@ -577,6 +447,7 @@ cat .env | grep OLLAMA_API_URL
 #### Issue: "API Timeout"
 
 **Solutions:**
+
 ```bash
 # Increase timeout in .env
 API_TIMEOUT=600
@@ -591,6 +462,7 @@ MODEL_NAME=llama2:7b
 #### Issue: "No files found"
 
 **Solutions:**
+
 ```bash
 # Check directory path
 ai-doc-agent --directory /absolute/path/to/project
@@ -605,6 +477,7 @@ ai-doc-agent --verbose
 #### Issue: "Poor documentation quality"
 
 **Solutions:**
+
 ```bash
 # Increase iterations
 ai-doc-agent --max-iterations 5
@@ -622,6 +495,7 @@ ai-doc-agent --project-type backend
 #### Issue: "PDF generation failed"
 
 **Solution:**
+
 ```bash
 # Install wkhtmltopdf
 # Windows: choco install wkhtmltopdf
@@ -659,21 +533,25 @@ ai-doc-agent --format markdown
 ### For Best Performance
 
 1. **Start Small**
+
    ```bash
    ai-doc-agent --max-files 20 --max-iterations 2
    ```
 
 2. **Use Fast Models**
+
    ```bash
    MODEL_NAME=llama2:7b
    ```
 
 3. **Increase Timeout**
+
    ```bash
    API_TIMEOUT=600
    ```
 
 4. **Monitor Resources**
+
    ```bash
    # Check Ollama memory usage
    ollama ps
@@ -682,6 +560,7 @@ ai-doc-agent --format markdown
 ### For Production Use
 
 1. **Version Control**
+
    ```bash
    # Track generated docs
    git add docs/
@@ -689,21 +568,24 @@ ai-doc-agent --format markdown
    ```
 
 2. **Automation**
+
    ```bash
    # Add to pre-commit hook
    ai-doc-agent --output docs/API
    ```
 
 3. **Quality Checks**
+
    ```bash
    # Always use verbose mode first
    ai-doc-agent --verbose
    
-   # Review ai_agent.log
-   tail -f ai_agent.log
+   # Review langgraph_agent.log
+   tail -f langgraph_agent.log
    ```
 
 4. **Backup**
+
    ```bash
    # Keep previous versions
    cp output/docs.md output/docs_backup_$(date +%Y%m%d).md
@@ -712,11 +594,13 @@ ai-doc-agent --format markdown
 ---
 
 **For More Information:**
+
 - [Bundling Guide](deployment/bundling.md)
 - [Project Structure](reference/structure.md)
 - [Examples](examples/samples.md)
 
 **Support:**
-- Check logs: `ai_agent.log`
+
+- Check logs: `langgraph_agent.log`
 - Run with: `--verbose`
 - Review: Troubleshooting section above
